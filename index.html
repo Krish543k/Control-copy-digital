@@ -1500,7 +1500,8 @@ function uploadCSV(file) {
                         secTarget: obj["SecTarget"] || "",
                         secUsl: obj["SecUsl"] || "",
                         secTera: obj["SecTera"] || "",
-                        status: "OK"
+                        status: "OK",
+                        addedOn: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})
                     };
                     count++;
                 }
@@ -1571,7 +1572,8 @@ function addManualData() {
         secTarget: document.getElementById('secTarget').value.trim(),
         secUsl: document.getElementById('secUsl').value.trim(),
         secTera: document.getElementById('secTera').value.trim(),
-        status: "OK"
+        status: "OK",
+        addedOn: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})
     };
     
     try {
@@ -1777,6 +1779,7 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
                 </div>
                 ${adminBtns}
                 <button class="share-card-btn" onclick="shareProduct('${item.pcode}')">📤 Share Product</button>
+                ${item.addedOn ? `<p style="text-align:right;font-size:11px;color:#aaa;margin-top:8px;">📅 Added: ${item.addedOn}</p>` : ''}
             </div>
             <div class="section-content secondary-section" data-section="secondary">
                 <span class="secondary-label">SECONDARY</span>
@@ -1832,6 +1835,7 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
                 
                 ${adminBtns}
                 <button class="share-card-btn" onclick="shareProduct('${item.pcode}')">📤 Share Product</button>
+                ${item.addedOn ? `<p style="text-align:right;font-size:11px;color:#aaa;margin-top:8px;">📅 Added: ${item.addedOn}</p>` : ''}
             </div>
         </div>
     `;
@@ -1966,7 +1970,16 @@ function clearSearch() {
     document.getElementById('searchInput').value = '';
     vibrateDevice([50]);
     hideResultCount();
-    showEmptyState(); // Show empty state instead of all data
+    showEmptyState();
+    // Server se fresh data sync karo
+    syncFromServer().then(() => {
+        const stored = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
+        const count = Object.keys(stored).length;
+        if (count > 0) {
+            document.getElementById('countText').innerHTML = `✅ <span style="color:#4CAF50;">${count}</span> records ready — search karo`;
+            document.getElementById('resultCount').style.display = 'block';
+        }
+    });
 }
 
 // Delete Single Card Function
