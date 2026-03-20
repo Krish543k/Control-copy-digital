@@ -3526,20 +3526,12 @@ function clearApiSettings() {
 // ============================================================
 
 // API keys HTML mein nahi hain — localStorage mein store hoti hain
-// Bin ID public hai — sabko dikhta hai, safe hai
-// API Key sirf config.js mein hai — sirf admin device pe
-const PUBLIC_BIN_ID = (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.binId)
-    ? JSONBIN_CONFIG.binId
-    : localStorage.getItem('jb_bin_id') || localStorage.getItem('jb_public_bin_id') || '69bc3378c3097a1dd53de284';
+// API Key aur Bin ID config.js se aayegi
+const PUBLIC_BIN_ID = (typeof JSONBIN_CONFIG !== 'undefined') ? JSONBIN_CONFIG.binId : '';
+const HARDCODED_API_KEY = (typeof JSONBIN_CONFIG !== 'undefined') ? JSONBIN_CONFIG.apiKey : '';
 
-function getApiKey() {
-    if (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.apiKey)
-        return JSONBIN_CONFIG.apiKey;
-    return localStorage.getItem('jb_api_key') || '';
-}
-function getBinId() {
-    return PUBLIC_BIN_ID;
-}
+function getApiKey() { return HARDCODED_API_KEY; }
+function getBinId()  { return PUBLIC_BIN_ID; }
 
 function isJsonBinConfigured() {
     return getBinId() !== '';
@@ -3567,10 +3559,16 @@ async function syncFromServer() {
 
 // Bin ko public karo — sirf ek baar
 async function makeBinPublic() {
-    const key = (typeof JSONBIN_CONFIG !== 'undefined') ? JSONBIN_CONFIG.apiKey : '';
-    const bin = '69bc3378c3097a1dd53de284';
-    if (!key) return;
-    if (localStorage.getItem('bin_made_public')) return; // pehle ho chuka hai
+    const key = getApiKey();
+    const bin = getBinId();
+    if (!key || !bin) return;
+    if (localStorage.getItem('bin_made_public')) return;
+// Bin ko public karo — sirf ek baar
+async function makeBinPublic() {
+    const key = getApiKey();
+    const bin = getBinId();
+    if (!key || !bin) return;
+    if (localStorage.getItem('bin_made_public_' + bin)) return;
     try {
         await fetch(`https://api.jsonbin.io/v3/b/${bin}/meta`, {
             method: 'PUT',
@@ -3580,18 +3578,16 @@ async function makeBinPublic() {
             },
             body: JSON.stringify({ private: false })
         });
-        localStorage.setItem('bin_made_public', 'true');
+        localStorage.setItem('bin_made_public_' + bin, 'true');
         console.log('✅ Bin is now public');
     } catch(e) {
         console.warn('Could not make bin public:', e.message);
     }
-}
-
-// Server par data save karo — sirf tab jab API key ho (admin device)
-async function syncToServer() {
-    if (!getApiKey() || !getBinId()) return;
+}       return;
+    }
     try {
         const data = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
+        console.log('🔄 Server pe save ho raha hai... Records:', Object.keys(data).length);
         const res = await fetch(`https://api.jsonbin.io/v3/b/${getBinId()}`, {
             method: 'PUT',
             headers: {
@@ -3600,12 +3596,15 @@ async function syncToServer() {
             },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error('Save failed: ' + res.status);
-        console.log('✅ Data saved to server.');
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Save failed: ${res.status} — ${errText}`);
+        }
+        console.log('✅ Data saved to server successfully!');
+        showSuccessPopup('✅ Server pe save ho gaya!');
     } catch (err) {
-        console.warn('⚠️ Server save failed (data saved locally):', err.message);
-    }
-}
+        console.error('❌ Server save error:', err.message);
+        showSuccessPopup('⚠️ Server save failed: ' + err.message);
 
 // App open hone par server se data load karo
 function unlockApp(role) {
