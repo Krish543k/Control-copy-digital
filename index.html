@@ -3563,25 +3563,23 @@ async function syncFromServer() {
     if (!binId) return;
     try {
         const headers = { 'X-Bin-Meta': 'false' };
-        if (getApiKey()) {
-            headers['X-Master-Key'] = getApiKey();
-            headers['X-Access-Key'] = getApiKey();
-        }
+        const key = getApiKey();
+        if (key) headers['X-Master-Key'] = key;
         const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
         if (!res.ok) {
-            if (res.status === 401) throw new Error('401 - API Key galat hai! config.js check karo');
+            if (res.status === 401) throw new Error('401 - API Key galat hai!');
             if (res.status === 404) throw new Error('404 - Bin ID nahi mila!');
             throw new Error('HTTP ' + res.status);
         }
         const json = await res.json();
-        // record.data mein hai ya directly record mein
         const rec = json.record || {};
-        const serverData = rec.data !== undefined ? rec.data : rec;
+        // bin mein {"data": {...}} format hai
+        const serverData = rec.data || {};
         const localData = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
         const merged = Object.assign({}, localData, serverData);
         localStorage.setItem('mc_data_v1', JSON.stringify(merged));
         const count = Object.keys(merged).length;
-        if (count > 0) showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
+        showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
         return merged;
     } catch (err) {
         showSyncToast('❌ ' + err.message, '#f44336');
@@ -3597,8 +3595,7 @@ async function syncToServer() {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': getApiKey(),
-                'X-Access-Key': getApiKey()
+                'X-Master-Key': getApiKey()
             },
             body: JSON.stringify({ data: data })
         });
@@ -3612,6 +3609,10 @@ async function syncToServer() {
         showSyncToast('❌ ' + err.message, '#f44336');
     }
 }
+
+
+
+
 
 // App open hone par server se data load karo
 function unlockApp(role) {
