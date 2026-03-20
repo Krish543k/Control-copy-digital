@@ -1509,7 +1509,8 @@ function uploadCSV(file) {
             closeUploadModal();
             vibrateDevice([100, 50, 100]);
             showSuccessPopup(`Successfully uploaded ${count} records! Use search to find them.`);
-            showEmptyState(); // Show empty state after upload
+            syncToServer();
+            showEmptyState();
         } catch (error) {
             alert('Error processing CSV: ' + error.message);
         }
@@ -2045,6 +2046,8 @@ function downloadTemplate() {
 }
 
 window.onload = function() {
+    // Bin public karo — ek baar
+    makeBinPublic();
     // Show password screen on load
     showPasswordScreen();
     // Load saved theme
@@ -3510,29 +3513,28 @@ function clearApiSettings() {
 // ============================================================
 
 // API keys HTML mein nahi hain — localStorage mein store hoti hain
-// Admin settings se enter karo — GitHub pe leak nahi hogi
+// Bin ID public hai — sabko dikhta hai, safe hai
+// API Key sirf config.js mein hai — sirf admin device pe
+const PUBLIC_BIN_ID = (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.binId)
+    ? JSONBIN_CONFIG.binId
+    : localStorage.getItem('jb_bin_id') || localStorage.getItem('jb_public_bin_id') || '69bc3378c3097a1dd53de284';
+
 function getApiKey() {
-    // Pehle config.js check karo (local file, GitHub pe nahi jayegi)
     if (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.apiKey)
         return JSONBIN_CONFIG.apiKey;
-    // Phir localStorage check karo (settings se save ki hui)
     return localStorage.getItem('jb_api_key') || '';
 }
 function getBinId() {
-    // Pehle config.js check karo
-    if (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.binId)
-        return JSONBIN_CONFIG.binId;
-    // Phir localStorage check karo
-    return localStorage.getItem('jb_bin_id') || localStorage.getItem('jb_public_bin_id') || '';
+    return PUBLIC_BIN_ID;
 }
 
 function isJsonBinConfigured() {
-    return getApiKey() !== '' && getBinId() !== '';
+    return getBinId() !== '';
 }
 
 // Server se data fetch karo — public bin se, key optional
 async function syncFromServer() {
-    const binId = getBinId() || localStorage.getItem('jb_public_bin_id') || '';
+    const binId = getBinId();
     if (!binId) return;
     try {
         const headers = { 'X-Bin-Meta': 'false' };
@@ -3550,9 +3552,31 @@ async function syncFromServer() {
     }
 }
 
-// Server par data save karo
+// Bin ko public karo — sirf ek baar
+async function makeBinPublic() {
+    const key = (typeof JSONBIN_CONFIG !== 'undefined') ? JSONBIN_CONFIG.apiKey : '';
+    const bin = '69bc3378c3097a1dd53de284';
+    if (!key) return;
+    if (localStorage.getItem('bin_made_public')) return; // pehle ho chuka hai
+    try {
+        await fetch(`https://api.jsonbin.io/v3/b/${bin}/meta`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': key
+            },
+            body: JSON.stringify({ private: false })
+        });
+        localStorage.setItem('bin_made_public', 'true');
+        console.log('✅ Bin is now public');
+    } catch(e) {
+        console.warn('Could not make bin public:', e.message);
+    }
+}
+
+// Server par data save karo — sirf tab jab API key ho (admin device)
 async function syncToServer() {
-    if (!isJsonBinConfigured()) return;
+    if (!getApiKey() || !getBinId()) return;
     try {
         const data = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
         const res = await fetch(`https://api.jsonbin.io/v3/b/${getBinId()}`, {
@@ -3582,6 +3606,14 @@ function unlockApp(role) {
         syncFromServer().then(() => {
             const term = document.getElementById('searchInput')?.value?.trim();
             if (term) searchData();
+            // Server se data aane ke baad count dikhao
+            const stored = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
+            const count = Object.keys(stored).length;
+            if (count > 0) {
+                showResultCount(count, 'all');
+                document.getElementById('countText').innerHTML = `✅ Server se <span style="color:#4CAF50;">${count}</span> records load hue — search karo`;
+                document.getElementById('resultCount').style.display = 'block';
+            }
         });
     }
 }
