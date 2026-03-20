@@ -3574,7 +3574,9 @@ async function syncFromServer() {
             throw new Error('HTTP ' + res.status);
         }
         const json = await res.json();
-        const serverData = json.record || {};
+        // record.data mein hai ya directly record mein
+        const rec = json.record || {};
+        const serverData = rec.data !== undefined ? rec.data : rec;
         const localData = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
         const merged = Object.assign({}, localData, serverData);
         localStorage.setItem('mc_data_v1', JSON.stringify(merged));
@@ -3598,7 +3600,7 @@ async function syncToServer() {
                 'X-Master-Key': getApiKey(),
                 'X-Access-Key': getApiKey()
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({ data: data })
         });
         if (!res.ok) {
             if (res.status === 401) throw new Error('401 - API Key galat hai!');
@@ -3610,10 +3612,6 @@ async function syncToServer() {
         showSyncToast('❌ ' + err.message, '#f44336');
     }
 }
-
-
-
-
 
 // App open hone par server se data load karo
 function unlockApp(role) {
