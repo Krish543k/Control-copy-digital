@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- config.js se API key aur Bin ID load hogi — ye file .gitignore mein hai -->
-    <script src="config.js"></script>
+    <script src="config.js" onerror="console.warn('config.js not found')"></script>
     <style>
 * {
     margin: 0;
@@ -3525,19 +3525,14 @@ function clearApiSettings() {
 //   5. Neeche JSONBIN_API_KEY aur JSONBIN_BIN_ID fill karo
 // ============================================================
 
-// API keys HTML mein nahi hain — localStorage mein store hoti hain
-// API Key aur Bin ID config.js se aayegi
-const PUBLIC_BIN_ID = (typeof JSONBIN_CONFIG !== 'undefined') ? JSONBIN_CONFIG.binId : '';
-const HARDCODED_API_KEY = (typeof JSONBIN_CONFIG !== 'undefined') ? JSONBIN_CONFIG.apiKey : '';
+// API Key aur Bin ID — config.js se load hogi, fallback bhi hai
+const PUBLIC_BIN_ID = (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.binId)
+    ? JSONBIN_CONFIG.binId : '';
+const HARDCODED_API_KEY = (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.apiKey)
+    ? JSONBIN_CONFIG.apiKey : '';
 
 function getApiKey() { return HARDCODED_API_KEY; }
 function getBinId()  { return PUBLIC_BIN_ID; }
-
-function isJsonBinConfigured() {
-    return getBinId() !== '';
-}
-
-// Server se data fetch karo — public bin se, key optional
 async function syncFromServer() {
     const binId = getBinId();
     if (!binId) return;
@@ -3605,7 +3600,7 @@ async function makeBinPublic() {
     } catch (err) {
         console.error('❌ Server save error:', err.message);
         showSuccessPopup('⚠️ Server save failed: ' + err.message);
-
+    }
 // App open hone par server se data load karo
 function unlockApp(role) {
     window._userRole = role || 'admin';
