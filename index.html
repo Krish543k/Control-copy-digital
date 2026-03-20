@@ -3563,7 +3563,10 @@ async function syncFromServer() {
     if (!binId) return;
     try {
         const headers = { 'X-Bin-Meta': 'false' };
-        if (getApiKey()) headers['X-Master-Key'] = getApiKey();
+        if (getApiKey()) {
+            headers['X-Master-Key'] = getApiKey();
+            headers['X-Access-Key'] = getApiKey();
+        }
         const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
         if (!res.ok) {
             if (res.status === 401) throw new Error('401 - API Key galat hai! config.js check karo');
@@ -3592,7 +3595,8 @@ async function syncToServer() {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': getApiKey()
+                'X-Master-Key': getApiKey(),
+                'X-Access-Key': getApiKey()
             },
             body: JSON.stringify(data)
         });
@@ -3606,6 +3610,10 @@ async function syncToServer() {
         showSyncToast('❌ ' + err.message, '#f44336');
     }
 }
+
+
+
+
 
 // App open hone par server se data load karo
 function unlockApp(role) {
