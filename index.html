@@ -3541,92 +3541,6 @@ function isJsonBinConfigured() {
     return getApiKey() !== '' && getBinId() !== '';
 }
 
-// Server se data fetch karo — public bin se, key optional
-async function syncFromServer() {
-    const binId = getBinId() || localStorage.getItem('jb_public_bin_id') || '';
-    if (!binId) return;
-    try {
-        const headers = { 'X-Bin-Meta': 'false' };
-        if (getApiKey()) headers['X-Master-Key'] = getApiKey();
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
-        if (!res.ok) throw new Error('Fetch failed: ' + res.status);
-        const json = await res.json();
-        const serverData = json.record || {};
-        const localData = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
-        const merged = Object.assign({}, localData, serverData);
-        localStorage.setItem('mc_data_v1', JSON.stringify(merged));
-        console.log('✅ Data synced from server. Records:', Object.keys(merged).length);
-    } catch (err) {
-        console.warn('⚠️ Server sync failed (offline mode):', err.message);
-    }
-}
-
-// Server par data save karo
-async function syncToServer() {
-    if (!isJsonBinConfigured()) return;
-    try {
-        const data = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${getBinId()}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': getApiKey()
-            },
-            body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Save failed: ' + res.status);
-        console.log('✅ Data saved to server.');
-    } catch (err) {
-        console.warn('⚠️ Server save failed (data saved locally):', err.message);
-    }
-}
-
-// Original save functions ko wrap karo — har save ke baad server sync
-const _origAddManualData = addManualData;
-async function addManualData() {
-    _origAddManualData();
-    await syncToServer();
-}
-
-const _origDeleteCard = deleteCard;
-async function deleteCard(pcode) {
-    _origDeleteCard(pcode);
-    await syncToServer();
-}
-
-// App open hone par server se data load karo
-function unlockApp(role) {
-    window._userRole = role || 'admin';
-    document.getElementById('passwordScreen').style.display = 'none';
-    vibrateDevice([100]);
-    loadDarkMode();
-    showEmptyState();
-    applyRoleAccess(window._userRole);
-    if (isJsonBinConfigured()) {
-        syncFromServer().then(() => {
-            // Agar search box mein kuch hai to refresh karo
-            const term = document.getElementById('searchInput')?.value?.trim();
-            if (term) searchData();
-        });
-    }
-}
-
-// ===== JSONBin Sync System =====
-
-function getApiKey() {
-    return localStorage.getItem('jsonbin_api_key') ||
-           (typeof JSONBIN_CONFIG !== 'undefined' ? JSONBIN_CONFIG.apiKey : '');
-}
-
-function getBinId() {
-    return localStorage.getItem('jsonbin_bin_id') ||
-           (typeof JSONBIN_CONFIG !== 'undefined' ? JSONBIN_CONFIG.binId : '');
-}
-
-function isJsonBinConfigured() {
-    return !!(getApiKey() && getBinId());
-}
-
 function showSyncToast(msg, color) {
     let t = document.getElementById('syncToast');
     if (!t) {
@@ -3643,95 +3557,73 @@ function showSyncToast(msg, color) {
     t._timer = setTimeout(() => { t.style.opacity = '0'; setTimeout(() => { t.style.display = 'none'; }, 300); }, 3500);
 }
 
+// Server se data fetch karo — public bin se, key optional
 async function syncFromServer() {
-    if (!isJsonBinConfigured()) return;
+    const binId = getBinId();
+    if (!binId) return;
     try {
-        const r = await fetch('https://api.jsonbin.io/v3/b/' + getBinId() + '/latest', {
-            headers: { 'X-Master-Key': getApiKey(), 'X-Bin-Meta': 'false' }
-        });
-        if (!r.ok) {
-            if (r.status === 401) throw new Error('401 - API Key galat hai! config.js check karo');
-            if (r.status === 404) throw new Error('404 - Bin ID nahi mila!');
-            throw new Error('HTTP ' + r.status);
+        const headers = { 'X-Bin-Meta': 'false' };
+        if (getApiKey()) headers['X-Master-Key'] = getApiKey();
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers });
+        if (!res.ok) {
+            if (res.status === 401) throw new Error('401 - API Key galat hai! config.js check karo');
+            if (res.status === 404) throw new Error('404 - Bin ID nahi mila!');
+            throw new Error('HTTP ' + res.status);
         }
-        const rec = (j.record !== undefined) ? j.record : j;
-        let srv = {};
-        if (rec && rec.mc_data_v1 && typeof rec.mc_data_v1 === 'object') {
-            srv = rec.mc_data_v1;
-        } else if (rec && Array.isArray(rec.products)) {
-            rec.products.forEach(x => { if (x && x.pcode) srv[x.pcode] = x; });
-        } else if (Array.isArray(rec)) {
-            rec.forEach(x => { if (x && x.pcode) srv[x.pcode] = x; });
-        } else if (rec && typeof rec === 'object' && Object.keys(rec).length > 0) {
-            srv = rec;
-        }
-        const loc = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
-        const merged = Object.assign({}, loc, srv);
+        const json = await res.json();
+        const serverData = json.record || {};
+        const localData = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
+        const merged = Object.assign({}, localData, serverData);
         localStorage.setItem('mc_data_v1', JSON.stringify(merged));
         const count = Object.keys(merged).length;
         if (count > 0) showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
         return merged;
-    } catch (e) {
-        showSyncToast('❌ ' + e.message, '#f44336');
+    } catch (err) {
+        showSyncToast('❌ ' + err.message, '#f44336');
     }
 }
 
+// Server par data save karo
 async function syncToServer() {
     if (!isJsonBinConfigured()) return;
     try {
         const data = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
-        const r = await fetch('https://api.jsonbin.io/v3/b/' + getBinId(), {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${getBinId()}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-Master-Key': getApiKey() },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': getApiKey()
+            },
             body: JSON.stringify(data)
         });
-        if (!r.ok) {
-            if (r.status === 401) throw new Error('401 - API Key galat hai!');
-            if (r.status === 404) throw new Error('404 - Bin ID nahi mila!');
-            throw new Error('HTTP ' + r.status);
+        if (!res.ok) {
+            if (res.status === 401) throw new Error('401 - API Key galat hai!');
+            if (res.status === 404) throw new Error('404 - Bin ID nahi mila!');
+            throw new Error('HTTP ' + res.status);
         }
-        showSyncToast('☁️ Saved to server', '#2196F3');
-    } catch (e) {
-        showSyncToast('❌ ' + e.message, '#f44336');
+        showSyncToast('☁️ Server pe save ho gaya', '#2196F3');
+    } catch (err) {
+        showSyncToast('❌ ' + err.message, '#f44336');
     }
 }
 
-function saveDataAndSync(data) {
-    localStorage.setItem('mc_data_v1', JSON.stringify(data));
-    syncToServer();
+// App open hone par server se data load karo
+function unlockApp(role) {
+    window._userRole = role || 'admin';
+    document.getElementById('passwordScreen').style.display = 'none';
+    vibrateDevice([100]);
+    loadDarkMode();
+    loadTheme();
+    showEmptyState();
+    applyRoleAccess(window._userRole);
+    if (isJsonBinConfigured()) {
+        syncFromServer().then(() => {
+            // Agar search box mein kuch hai to refresh karo
+            const term = document.getElementById('searchInput')?.value?.trim();
+            if (term) searchData();
+        });
+    }
 }
-
-function openApiSettings() {
-    let modal = document.getElementById('apiSettingsModal');
-    if (modal) { modal.style.display = 'flex'; toggleMenu(); return; }
-    modal = document.createElement('div');
-    modal.id = 'apiSettingsModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:3000;';
-    modal.innerHTML =
-        '<div style="background:white;padding:30px;border-radius:12px;width:90%;max-width:450px;position:relative;">' +
-        '<span onclick="document.getElementById(\'apiSettingsModal\').style.display=\'none\'" style="position:absolute;right:15px;top:10px;font-size:26px;cursor:pointer;color:#999;">&times;</span>' +
-        '<h2 style="color:#667eea;margin-bottom:20px;">🔗 Online Sync Setup</h2>' +
-        '<p style="color:#666;margin-bottom:15px;font-size:13px;">JSONBin API credentials</p>' +
-        '<input id="apiKeyInput" type="text" placeholder="X-Master-Key (API Key)" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:6px;margin-bottom:12px;font-size:13px;box-sizing:border-box;" value="' + getApiKey() + '">' +
-        '<input id="binIdInput" type="text" placeholder="Bin ID" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:6px;margin-bottom:20px;font-size:13px;box-sizing:border-box;" value="' + getBinId() + '">' +
-        '<button onclick="saveApiSettings()" style="width:100%;padding:13px;background:#667eea;color:white;border:none;border-radius:6px;font-size:15px;cursor:pointer;margin-bottom:10px;">💾 Save & Sync</button>' +
-        '<button onclick="syncFromServer()" style="width:100%;padding:13px;background:#4CAF50;color:white;border:none;border-radius:6px;font-size:15px;cursor:pointer;">🔄 Sync Now from Server</button>' +
-        '</div>';
-    document.body.appendChild(modal);
-    toggleMenu();
-}
-
-function saveApiSettings() {
-    const key = (document.getElementById('apiKeyInput').value || '').trim();
-    const bin = (document.getElementById('binIdInput').value || '').trim();
-    if (!key || !bin) { showSyncToast('Both fields required', '#f44336'); return; }
-    localStorage.setItem('jsonbin_api_key', key);
-    localStorage.setItem('jsonbin_bin_id', bin);
-    document.getElementById('apiSettingsModal').style.display = 'none';
-    showSyncToast('✅ Settings saved!', '#4CAF50');
-    syncFromServer();
-}
-
     </script>
 </body>
 </html>
