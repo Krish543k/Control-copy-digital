@@ -589,25 +589,133 @@ body.dark-mode .filter-row select {
 }
 
 .data-label {
-    font-weight: 600;
-    color: #555;
+    font-weight: 700;
+    color: #667eea;
     background: transparent !important;
+    font-size: 13px;
 }
 
 .data-value {
-    color: #333;
-    font-weight: 500;
+    color: #222;
+    font-weight: 600;
     background: transparent !important;
+    font-size: 14px;
 }
 
 body.dark-mode .data-label {
-    color: #ffffff !important;
+    color: #7eb3ff !important;
     background: transparent !important;
 }
 
 body.dark-mode .data-value {
-    color: #ffffff !important;
+    color: #e8e8e8 !important;
     background: transparent !important;
+}
+
+/* Label = muted, Value = bright */
+.data-label {
+    font-weight: 600;
+    color: #8899bb;
+    background: transparent !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.data-value {
+    color: #ffffff;
+    font-weight: 700;
+    background: transparent !important;
+    font-size: 14px;
+}
+
+/* Light mode overrides */
+body:not(.dark-mode) .data-label { color: #888; }
+body:not(.dark-mode) .data-value { color: #222; }
+
+body.dark-mode .data-label {
+    color: #8899bb !important;
+    background: transparent !important;
+}
+
+body.dark-mode .data-value {
+    color: #e8e8e8 !important;
+    background: transparent !important;
+}
+
+/* Special field colors */
+.val-lsl    { color: #ff6b6b !important; font-weight: 700 !important; }
+.val-target { color: #69f0ae !important; font-weight: 700 !important; }
+.val-usl    { color: #ffab40 !important; font-weight: 700 !important; }
+.val-tera   { color: #ce93d8 !important; font-weight: 700 !important; }
+.val-pcode  { color: #82b1ff !important; font-weight: 800 !important; font-size: 18px !important; }
+.val-mrp    { color: #69f0ae !important; font-weight: 700 !important; }
+
+body:not(.dark-mode) .val-lsl    { color: #e53935 !important; }
+body:not(.dark-mode) .val-target { color: #2e7d32 !important; }
+body:not(.dark-mode) .val-usl    { color: #e65100 !important; }
+body:not(.dark-mode) .val-tera   { color: #6a1b9a !important; }
+body:not(.dark-mode) .val-pcode  { color: #1565c0 !important; }
+body:not(.dark-mode) .val-mrp    { color: #2e7d32 !important; }
+
+/* Card split layout — main left, weight right */
+.card-split {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+}
+
+.card-main {
+    flex: 1;
+    min-width: 0;
+    padding-right: 10px;
+    border-right: 1px solid rgba(102,126,234,0.2);
+}
+
+.card-weight {
+    width: 160px;
+    flex-shrink: 0;
+    padding-left: 12px;
+}
+
+.weight-box-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.weight-box-title.primary   { background: #667eea; color: white; }
+.weight-box-title.secondary { background: #764ba2; color: white; }
+
+.weight-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(102,126,234,0.15);
+    font-size: 14px;
+}
+
+.weight-row:last-child { border-bottom: none; }
+
+.weight-key {
+    font-size: 12px;
+    font-weight: 700;
+    color: #8899bb;
+    text-transform: uppercase;
+    min-width: 45px;
+}
+
+body:not(.dark-mode) .weight-key { color: #888; }
+
+@media (max-width: 400px) {
+    .card-weight { width: 130px; }
+    .weight-row  { font-size: 13px; }
 }
 
 .pcode-highlight {
@@ -1257,6 +1365,8 @@ body.dark-mode .corner {
                 <div class="dot"></div>
             </div>
             <h1>Digital Control Copy</h1>
+            <button onclick="openCalculator()" title="Calculator" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);cursor:pointer;font-size:20px;width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0;color:white;">⇄</button>
+            <div style="flex:1;"></div>
             <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
                 <span id="darkModeIcon">🌙</span>
             </div>
@@ -1284,15 +1394,8 @@ body.dark-mode .corner {
             <div class="menu-item" onclick="openThemeSelector()">
                 <span>🎨 Change Theme</span>
             </div>
-            <div class="menu-item" onclick="changePassword()">
-                <span>🔑 Change Admin Password</span>
-            </div>
-            <div class="menu-item" onclick="changeUserPassword()">
-                <span>🔑 Change User Password</span>
-            </div>
-
-            <div class="menu-item" onclick="manageFingerprintAuth()">
-                <span>👆 Fingerprint Setup</span>
+            <div class="menu-item" onclick="openPrivacySettings()" style="background:linear-gradient(135deg,#667eea15,#764ba215);border-left:3px solid #667eea;">
+                <span>🔐 Privacy Settings</span>
             </div>
             <div class="menu-item" onclick="openLocationSettings()">
                 <span>📍 Location Settings</span>
@@ -1301,9 +1404,6 @@ body.dark-mode .corner {
                 <span>📖 Guide</span>
             </div>
             <div class="menu-item" onclick="downloadAPK()"><span>📱 Download APK for Android</span></div>
-            <div class="menu-item" onclick="openApiSettings()">
-                <span>🔗 API / Bin ID Settings</span>
-            </div>
             <div class="menu-item" onclick="openCalculatorSettings()">
                 <span>⚙️ Calculator Settings</span>
             </div>
@@ -1858,71 +1958,72 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
             </div>
             <div class="section-content primary-section" data-section="primary">
                 <span class="primary-label">PRIMARY</span>
-                <div class="data-row">
-                    <span class="data-label">P Code:</span>
-                    <span class="data-value pcode-highlight">${highlightText(item.pcode, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Bulk G/Case:</span>
-                    <span class="data-value">${highlightText(item.bulkGCase, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Description / SKU:</span>
-                    <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">MRP:</span>
-                    <span class="data-value">
-                        <span class="price-old">Rs. ${highlightText(item.mrpOld, searchTerm)}</span> 
-                        <span class="price-new">Rs. ${highlightText(item.mrpNew, searchTerm)}</span>
-                    </span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Per Unit MRP:</span>
-                    <span class="data-value">Rs. ${highlightText(item.perUnitMrp, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Pouch G/Case:</span>
-                    <span class="data-value">${highlightText(item.pouchGCase, searchTerm)}</span>
-                </div>
-
-                <div class="data-row">
-                    <span class="data-label">Case G/Case:</span>
-                    <span class="data-value">${highlightText(item.caseGCase, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Z Partition:</span>
-                    <span class="data-value">${highlightText(item.zPartition, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Case / Pouch:</span>
-                    <span class="data-value">${highlightText(item.casePouch, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Pallet / Shipper:</span>
-                    <span class="data-value">${highlightText(item.palletShipper, searchTerm)}</span>
-                </div>
-                <div style="margin-top: 20px;">
-                    <h4 style="color: #667eea; margin-bottom: 10px;">Primary Weight</h4>
-                    <div class="data-row">
-                        <span class="data-label">Description / Variant / SKU:</span>
-                        <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
+                <div class="card-split">
+                    <!-- Left: Main Data -->
+                    <div class="card-main">
+                        <div class="data-row">
+                            <span class="data-label">P Code:</span>
+                            <span class="data-value pcode-highlight val-pcode">${highlightText(item.pcode, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Description / SKU:</span>
+                            <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Bulk G/Case:</span>
+                            <span class="data-value">${highlightText(item.bulkGCase, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">MRP:</span>
+                            <span class="data-value">
+                                <span class="price-old">Rs. ${highlightText(item.mrpOld, searchTerm)}</span>
+                                <span class="price-new val-mrp">Rs. ${highlightText(item.mrpNew, searchTerm)}</span>
+                            </span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Per Unit MRP:</span>
+                            <span class="data-value">Rs. ${highlightText(item.perUnitMrp, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Pouch G/Case:</span>
+                            <span class="data-value">${highlightText(item.pouchGCase, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Case G/Case:</span>
+                            <span class="data-value">${highlightText(item.caseGCase, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Z Partition:</span>
+                            <span class="data-value">${highlightText(item.zPartition, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Case / Pouch:</span>
+                            <span class="data-value">${highlightText(item.casePouch, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Pallet / Shipper:</span>
+                            <span class="data-value">${highlightText(item.palletShipper, searchTerm)}</span>
+                        </div>
                     </div>
-                    <div class="data-row">
-                        <span class="data-label">LSL:</span>
-                        <span class="data-value">${highlightText(item.lsl, searchTerm)}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Target:</span>
-                        <span class="data-value">${highlightText(item.target, searchTerm)}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">USL:</span>
-                        <span class="data-value">${highlightText(item.usl, searchTerm)}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Tera:</span>
-                        <span class="data-value">${highlightText(item.tera, searchTerm)}</span>
+                    <!-- Right: Weight Box -->
+                    <div class="card-weight">
+                        <div class="weight-box-title primary">Primary Wt</div>
+                        <div class="weight-row">
+                            <span class="weight-key">LSL</span>
+                            <span class="val-lsl" style="font-weight:700;font-size:13px;">${highlightText(item.lsl, searchTerm)}</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-key">Target</span>
+                            <span class="val-target" style="font-weight:700;font-size:13px;">${highlightText(item.target, searchTerm)}</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-key">USL</span>
+                            <span class="val-usl" style="font-weight:700;font-size:13px;">${highlightText(item.usl, searchTerm)}</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-key">Tera</span>
+                            <span class="val-tera" style="font-weight:700;font-size:13px;">${highlightText(item.tera, searchTerm)}</span>
+                        </div>
                     </div>
                 </div>
                 ${adminBtns}
@@ -1931,56 +2032,59 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
             </div>
             <div class="section-content secondary-section" data-section="secondary">
                 <span class="secondary-label">SECONDARY</span>
-                <div class="data-row">
-                    <span class="data-label">P Code:</span>
-                    <span class="data-value pcode-highlight">${highlightText(item.pcode, searchTerm)}</span>
-                </div>
-
-                <div class="data-row">
-                    <span class="data-label">Description / SKU:</span>
-                    <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Pouch G/Case:</span>
-                    <span class="data-value">${highlightText(item.secPouchGCase || item.pouchGCase, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Case G/Case:</span>
-                    <span class="data-value">${highlightText(item.secCaseGCase || item.caseGCase, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Z Partition:</span>
-                    <span class="data-value">${highlightText(item.secZPartition || item.zPartition, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Case / Pouch:</span>
-                    <span class="data-value">${highlightText(item.secCasePouch || item.casePouch, searchTerm)}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">Pallet / Shipper:</span>
-                    <span class="data-value">${highlightText(item.secPalletShipper || item.palletShipper, searchTerm)}</span>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <h4 style="color: #764ba2; margin-bottom: 10px;">Secondary Weight</h4>
-                    <div class="data-row">
-                        <span class="data-label">LSL:</span>
-                        <span class="data-value">${highlightText(item.secLsl || item.lsl || '-', searchTerm)}</span>
+                <div class="card-split">
+                    <!-- Left: Main Data -->
+                    <div class="card-main">
+                        <div class="data-row">
+                            <span class="data-label">P Code:</span>
+                            <span class="data-value pcode-highlight val-pcode">${highlightText(item.pcode, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Description / SKU:</span>
+                            <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Pouch G/Case:</span>
+                            <span class="data-value">${highlightText(item.secPouchGCase || item.pouchGCase, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Case G/Case:</span>
+                            <span class="data-value">${highlightText(item.secCaseGCase || item.caseGCase, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Z Partition:</span>
+                            <span class="data-value">${highlightText(item.secZPartition || item.zPartition, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Case / Pouch:</span>
+                            <span class="data-value">${highlightText(item.secCasePouch || item.casePouch, searchTerm)}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Pallet / Shipper:</span>
+                            <span class="data-value">${highlightText(item.secPalletShipper || item.palletShipper, searchTerm)}</span>
+                        </div>
                     </div>
-                    <div class="data-row">
-                        <span class="data-label">Target:</span>
-                        <span class="data-value">${highlightText(item.secTarget || item.target || '-', searchTerm)}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">USL:</span>
-                        <span class="data-value">${highlightText(item.secUsl || item.usl || '-', searchTerm)}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Tera:</span>
-                        <span class="data-value">${highlightText(item.secTera || item.tera || '-', searchTerm)}</span>
+                    <!-- Right: Weight Box -->
+                    <div class="card-weight">
+                        <div class="weight-box-title secondary">Secondary Wt</div>
+                        <div class="weight-row">
+                            <span class="weight-key">LSL</span>
+                            <span style="font-weight:700;font-size:13px;">${highlightText(item.secLsl || item.lsl || '-', searchTerm)}</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-key">Target</span>
+                            <span style="font-weight:700;font-size:13px;">${highlightText(item.secTarget || item.target || '-', searchTerm)}</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-key">USL</span>
+                            <span style="font-weight:700;font-size:13px;">${highlightText(item.secUsl || item.usl || '-', searchTerm)}</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-key">Tera</span>
+                            <span style="font-weight:700;font-size:13px;">${highlightText(item.secTera || item.tera || '-', searchTerm)}</span>
+                        </div>
                     </div>
                 </div>
-                
                 ${adminBtns}
                 <button class="share-card-btn" onclick="shareProduct('${item.pcode}')">📤 Share Product</button>
                 ${(item.addedOn || item.addedBy) ? `<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:6px;border-top:1px solid #eee;"><span style="font-size:11px;color:#888;">👤 ${item.addedBy || ''}</span><span style="font-size:11px;color:#aaa;">📅 ${item.addedOn || ''}</span></div>` : ''}
@@ -3442,34 +3546,95 @@ function openCalculator() {
 
 function openCalculatorSettings() {
     toggleMenu();
+    const existing = document.getElementById('calculatorSettingsModal');
+    if (existing) existing.remove();
+
+    const custom = JSON.parse(localStorage.getItem('customFormulas') || '{}');
+    const defaultF = {
+        'S1 70g': { pouchToShipper:2,  shipperToPallet:48, speed:3,  unit:'met'   },
+        '300g':   { pouchToShipper:24, shipperToPallet:42, speed:40, unit:'Pouch' },
+        '500g':   { pouchToShipper:12, shipperToPallet:50, speed:30, unit:'Pouch' },
+        '850g':   { pouchToShipper:12, shipperToPallet:40, speed:20, unit:'Pouch' },
+        '900g':   { pouchToShipper:12, shipperToPallet:40, speed:18, unit:'Pouch' },
+        '1kg':    { pouchToShipper:12, shipperToPallet:50, speed:15, unit:'Pouch' },
+        '2kg':    { pouchToShipper:6,  shipperToPallet:40, speed:10, unit:'Pouch' },
+        '3kg':    { pouchToShipper:4,  shipperToPallet:36, speed:8,  unit:'Pouch' },
+        '4kg':    { pouchToShipper:4,  shipperToPallet:30, speed:6,  unit:'Pouch' },
+        '5kg':    { pouchToShipper:4,  shipperToPallet:24, speed:5,  unit:'Pouch' },
+        '6kg':    { pouchToShipper:2,  shipperToPallet:20, speed:4,  unit:'Pouch' },
+    };
+    const allF = Object.assign({}, defaultF, custom);
+    const weightOpts = Object.keys(allF).map(k=>`<option value="${k}">${k}</option>`).join('');
+    const rows = Object.keys(allF).map(k=>{
+        const f=allF[k], isC=!!custom[k];
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:${isC?'#e8f5e9':'#f5f5f5'};border-radius:7px;margin-bottom:6px;font-size:13px;flex-wrap:wrap;gap:4px;">
+            <div><strong>${k}</strong> | ${f.pouchToShipper} Pouch/Shipper | ${f.shipperToPallet} Shipper/Pallet | ${f.speed} ${f.unit}/min</div>
+            ${isC?`<button onclick="deleteCalcFormula('${k}')" style="background:#f44336;color:white;border:none;padding:3px 9px;border-radius:5px;cursor:pointer;font-size:12px;">🗑</button>`:'<span style="font-size:11px;color:#999;">default</span>'}
+        </div>`;
+    }).join('');
+
     const modal = document.createElement('div');
     modal.id = 'calculatorSettingsModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;overflow-y:auto;';
-    const formulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    let formulaRows = '';
-    Object.keys(formulas).forEach(key => {
-        const f = formulas[key];
-        formulaRows += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f5f5f5;border-radius:8px;margin-bottom:8px;">
-            <div><strong>${key}</strong> — ${f.pouchPerMin} pouch/min, ${f.unit||'Pouch'}</div>
-            <button onclick="deleteCalcFormula('${key}')" style="background:#f44336;color:white;border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">🗑</button>
-        </div>`;
-    });
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;overflow-y:auto;padding:15px;box-sizing:border-box;';
     modal.innerHTML = `
-    <div style="background:white;border-radius:12px;padding:20px;max-width:500px;width:92%;max-height:90vh;overflow-y:auto;margin:auto;">
-        <h2 style="margin-top:0;color:#333;">⚙️ Calculator Settings</h2>
+    <div style="background:white;border-radius:12px;padding:20px;max-width:560px;width:100%;margin:auto;">
+        <h2 style="margin-top:0;color:#333;font-size:18px;">⚙️ Calculator Settings</h2>
         <div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:15px;font-size:13px;color:#1565c0;border-left:4px solid #1565c0;">
-            Formulas sync to server — all users see updates automatically.
+            ✅ Admin save karega to server pe jayega — sabhi users ko milega.
         </div>
-        <h3 style="color:#667eea;margin-bottom:10px;">📋 Existing Formulas</h3>
-        <div id="formulaList">${formulaRows || '<p style="color:#999;font-size:13px;">No formulas yet.</p>'}</div>
-        <hr style="margin:15px 0;">
-        <h3 style="color:#667eea;margin-bottom:10px;">➕ Add / Edit Formula</h3>
-        <input id="fName" placeholder="Weight Name (e.g. 100g)" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;margin-bottom:10px;font-size:14px;">
-        <input id="fPPM" type="number" placeholder="Pouches per minute" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;margin-bottom:10px;font-size:14px;">
-        <input id="fUnit" placeholder="Unit (default: Pouch)" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;margin-bottom:15px;font-size:14px;">
+
+        <!-- EDIT EXISTING -->
+        <div style="background:#fff3e0;border:1.5px solid #ff9800;border-radius:10px;padding:15px;margin-bottom:15px;">
+            <h3 style="margin:0 0 10px;color:#e65100;font-size:15px;">✏️ Edit Existing Formula</h3>
+            <select id="editWeightSel" onchange="loadFormulaForEdit()" style="width:100%;padding:10px;border:2px solid #ff9800;border-radius:8px;font-size:14px;margin-bottom:10px;">
+                <option value="">-- Weight Chuno --</option>${weightOpts}
+            </select>
+            <div id="editFields" style="display:none;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                    <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Pouch / Shipper</label>
+                        <input id="ePS" type="number" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;" oninput="updateEditPreview()"></div>
+                    <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Shipper / Pallet</label>
+                        <input id="eSP" type="number" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;" oninput="updateEditPreview()"></div>
+                    <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Speed / min</label>
+                        <input id="eSpd" type="number" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;" oninput="updateEditPreview()"></div>
+                    <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Unit</label>
+                        <select id="eUnit" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;" onchange="updateEditPreview()">
+                            <option value="Pouch">Pouch</option><option value="met">met</option></select></div>
+                </div>
+                <div style="background:#f9f9f9;border-radius:7px;padding:9px;margin-bottom:10px;font-size:13px;color:#555;">
+                    📊 <span id="editPreview" style="font-weight:700;color:#667eea;">—</span>
+                </div>
+                <button onclick="saveEditedFormula()" style="width:100%;padding:11px;background:#ff9800;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700;">💾 Save Changes</button>
+            </div>
+        </div>
+
+        <!-- ADD NEW -->
+        <div style="background:#e8f5e9;border:1.5px solid #4caf50;border-radius:10px;padding:15px;margin-bottom:15px;">
+            <h3 style="margin:0 0 10px;color:#2e7d32;font-size:15px;">➕ New Formula Add Karo</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Weight Name</label>
+                    <input id="nName" placeholder="e.g. 1.5kg" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Pouch / Shipper</label>
+                    <input id="nPS" type="number" placeholder="e.g. 12" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Shipper / Pallet</label>
+                    <input id="nSP" type="number" placeholder="e.g. 50" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Speed / min</label>
+                    <input id="nSpd" type="number" placeholder="e.g. 15" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Unit</label>
+                    <select id="nUnit" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:7px;font-size:14px;">
+                        <option value="Pouch">Pouch</option><option value="met">met</option></select></div>
+            </div>
+            <button onclick="saveNewFormula()" style="width:100%;padding:11px;background:#4caf50;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700;">➕ Add Formula</button>
+        </div>
+
+        <!-- ALL FORMULAS -->
+        <div style="margin-bottom:15px;">
+            <h3 style="color:#333;font-size:14px;margin-bottom:8px;">📋 Sabhi Formulas <span style="font-size:11px;color:#999;">(green = custom)</span></h3>
+            <div style="max-height:180px;overflow-y:auto;">${rows}</div>
+        </div>
+
         <div style="display:flex;gap:10px;">
-            <button onclick="saveCalcFormula()" style="flex:1;padding:12px;background:#667eea;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">💾 Save</button>
-            <button onclick="syncCalcFormulas()" style="flex:1;padding:12px;background:#4caf50;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">☁️ Sync</button>
+            <button onclick="syncCalcFormulas()" style="flex:1;padding:12px;background:#4caf50;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700;">☁️ Server pe Save</button>
             <button onclick="document.getElementById('calculatorSettingsModal').remove()" style="flex:1;padding:12px;background:#999;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">✖ Close</button>
         </div>
     </div>`;
@@ -3477,31 +3642,155 @@ function openCalculatorSettings() {
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
-function saveCalcFormula() {
-    const name = document.getElementById('fName').value.trim();
-    const ppm  = parseFloat(document.getElementById('fPPM').value);
-    const unit = document.getElementById('fUnit').value.trim() || 'Pouch';
-    if (!name || !ppm) { alert('Name and pouches/min required!'); return; }
-    const formulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    formulas[name] = { pouchPerMin: ppm, unit };
-    localStorage.setItem('customFormulas', JSON.stringify(formulas));
-    alert('✅ Formula saved!');
+function loadFormulaForEdit() {
+    const key = document.getElementById('editWeightSel').value;
+    const fields = document.getElementById('editFields');
+    if (!key) { fields.style.display='none'; return; }
+    const defaultF = {
+        'S1 70g':{pouchToShipper:2,shipperToPallet:48,speed:3,unit:'met'},
+        '300g':{pouchToShipper:24,shipperToPallet:42,speed:40,unit:'Pouch'},
+        '500g':{pouchToShipper:12,shipperToPallet:50,speed:30,unit:'Pouch'},
+        '850g':{pouchToShipper:12,shipperToPallet:40,speed:20,unit:'Pouch'},
+        '900g':{pouchToShipper:12,shipperToPallet:40,speed:18,unit:'Pouch'},
+        '1kg':{pouchToShipper:12,shipperToPallet:50,speed:15,unit:'Pouch'},
+        '2kg':{pouchToShipper:6,shipperToPallet:40,speed:10,unit:'Pouch'},
+        '3kg':{pouchToShipper:4,shipperToPallet:36,speed:8,unit:'Pouch'},
+        '4kg':{pouchToShipper:4,shipperToPallet:30,speed:6,unit:'Pouch'},
+        '5kg':{pouchToShipper:4,shipperToPallet:24,speed:5,unit:'Pouch'},
+        '6kg':{pouchToShipper:2,shipperToPallet:20,speed:4,unit:'Pouch'},
+    };
+    const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+    const f = custom[key] || defaultF[key];
+    if (!f) return;
+    document.getElementById('ePS').value = f.pouchToShipper;
+    document.getElementById('eSP').value = f.shipperToPallet;
+    document.getElementById('eSpd').value = f.speed;
+    document.getElementById('eUnit').value = f.unit||'Pouch';
+    fields.style.display = 'block';
+    updateEditPreview();
+}
+
+function updateEditPreview() {
+    const key = document.getElementById('editWeightSel').value;
+    const ps = document.getElementById('ePS').value;
+    const sp = document.getElementById('eSP').value;
+    const spd = document.getElementById('eSpd').value;
+    const unit = document.getElementById('eUnit').value;
+    if (!ps||!sp) return;
+    const pallet = parseInt(ps)*parseInt(sp);
+    document.getElementById('editPreview').textContent =
+        `${key}: 1 Shipper=${ps} Pouch | 1 Pallet=${sp} Shipper=${pallet} Pouch | Speed:${spd} ${unit}/min`;
+}
+
+function saveEditedFormula() {
+    const key = document.getElementById('editWeightSel').value;
+    if (!key) { alert('Weight select karo!'); return; }
+    const ps  = parseInt(document.getElementById('ePS').value);
+    const sp  = parseInt(document.getElementById('eSP').value);
+    const spd = parseFloat(document.getElementById('eSpd').value)||0;
+    const unit = document.getElementById('eUnit').value;
+    if (!ps||!sp) { alert('Pouch/Shipper aur Shipper/Pallet required!'); return; }
+    const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+    custom[key] = { pouchToShipper:ps, shipperToPallet:sp, pouchToPallet:ps*sp, speed:spd, unit };
+    localStorage.setItem('customFormulas', JSON.stringify(custom));
+    const pwd = prompt('Admin password enter karo to save to server:');
+    const adminPwd = localStorage.getItem('admin_password')||'1234';
+    if (pwd===adminPwd) {
+        syncToServer().then(()=>showSyncToast('✅ "'+key+'" server pe save hua!','#4caf50'));
+    } else if (pwd!==null) { alert('❌ Wrong password! Locally saved only.'); }
+    document.getElementById('calculatorSettingsModal').remove();
+    openCalculatorSettings();
+}
+
+function saveNewFormula() {
+    const name = document.getElementById('nName').value.trim();
+    const ps   = parseInt(document.getElementById('nPS').value);
+    const sp   = parseInt(document.getElementById('nSP').value);
+    const spd  = parseFloat(document.getElementById('nSpd').value)||0;
+    const unit = document.getElementById('nUnit').value;
+    if (!name) { alert('Weight name required!'); return; }
+    if (!ps||!sp) { alert('Pouch/Shipper aur Shipper/Pallet required!'); return; }
+    const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+    custom[name] = { pouchToShipper:ps, shipperToPallet:sp, pouchToPallet:ps*sp, speed:spd, unit };
+    localStorage.setItem('customFormulas', JSON.stringify(custom));
+    const pwd = prompt('Admin password enter karo to save to server:');
+    const adminPwd = localStorage.getItem('admin_password')||'1234';
+    if (pwd===adminPwd) {
+        syncToServer().then(()=>showSyncToast('✅ "'+name+'" server pe add hua!','#4caf50'));
+    } else if (pwd!==null) { alert('❌ Wrong password! Locally saved only.'); }
     document.getElementById('calculatorSettingsModal').remove();
     openCalculatorSettings();
 }
 
 function deleteCalcFormula(name) {
-    if (!confirm('Delete formula "' + name + '"?')) return;
-    const formulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    delete formulas[name];
-    localStorage.setItem('customFormulas', JSON.stringify(formulas));
+    if (!confirm('Delete "'+name+'" formula?')) return;
+    const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+    delete custom[name];
+    localStorage.setItem('customFormulas', JSON.stringify(custom));
     document.getElementById('calculatorSettingsModal').remove();
     openCalculatorSettings();
 }
 
 function syncCalcFormulas() {
-    if (!confirm('Sync formulas to server? All users will see updates.')) return;
-    syncToServer().then(() => { showSyncToast('✅ Formulas synced!', '#4caf50'); });
+    const pwd = prompt('Admin password enter karo to sync to server:');
+    const adminPwd = localStorage.getItem('admin_password')||'1234';
+    if (pwd!==adminPwd) { if (pwd!==null) alert('❌ Wrong password!'); return; }
+    syncToServer().then(()=>showSyncToast('✅ Formulas synced! Sabhi users ko milenge.','#4caf50'));
+}
+
+function openPrivacySettings() {
+    toggleMenu();
+    const existing = document.getElementById('privacySettingsModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'privacySettingsModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;padding:15px;box-sizing:border-box;';
+    modal.innerHTML = `
+    <div style="background:white;border-radius:14px;padding:0;max-width:400px;width:100%;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:18px 20px;display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;color:white;font-size:18px;">🔐 Privacy Settings</h2>
+            <button onclick="document.getElementById('privacySettingsModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:22px;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#215;</button>
+        </div>
+        <!-- Options -->
+        <div style="padding:10px 0;">
+            <div onclick="document.getElementById('privacySettingsModal').remove();changePassword();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#e3f2fd;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔑</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">Admin Password</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">Admin ka password badlo</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('privacySettingsModal').remove();changeUserPassword();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#e8f5e9;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔑</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">User Password</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">User ka password badlo</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('privacySettingsModal').remove();manageFingerprintAuth();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#fff3e0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👆</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">Fingerprint Setup</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">Biometric login setup karo</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('privacySettingsModal').remove();openApiSettings();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#f3e5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔗</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">API / Bin ID</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">Server connection settings</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
 function logoutApp() {
@@ -3984,20 +4273,7 @@ async function syncToServer() {
 let _syncPollInterval = null;
 
 function startAutoSync() {
-    if (_syncPollInterval) return; // already running
-    if (!getBinId()) return;
-    _syncPollInterval = setInterval(async () => {
-        if (!window._userRole) { stopAutoSync(); return; }
-        const before = JSON.stringify(JSON.parse(localStorage.getItem('mc_data_v1') || '{}'));
-        await syncFromServer();
-        const after = JSON.stringify(JSON.parse(localStorage.getItem('mc_data_v1') || '{}'));
-        // If data changed, refresh search results silently
-        if (before !== after) {
-            const term = document.getElementById('searchInput')?.value?.trim();
-            if (term) searchData();
-            showSyncToast('🔄 Data updated from server', '#667eea');
-        }
-    }, 120000); // every 2 minutes
+    // Auto sync disabled — manual refresh only
 }
 
 function stopAutoSync() {
@@ -4015,13 +4291,12 @@ function unlockApp(role) {
     loadTheme();
     showEmptyState();
     applyRoleAccess(window._userRole);
-    // Sync on login then start auto polling
+    // Sync on login only — no auto polling
     if (getBinId()) {
         syncFromServer().then(() => {
             const term = document.getElementById('searchInput')?.value?.trim();
             if (term) searchData();
         });
-        startAutoSync();
     }
 }
 </script>
