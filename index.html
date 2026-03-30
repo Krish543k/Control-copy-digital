@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -150,8 +151,6 @@ h1 {
     box-shadow: 2px 0 10px rgba(0,0,0,0.3);
     transition: left 0.3s ease;
     z-index: 1000;
-    display: flex;
-    flex-direction: column;
 }
 
 .side-menu.active {
@@ -180,8 +179,6 @@ h1 {
 
 .menu-content {
     padding: 10px 0;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
 }
 
 .menu-item {
@@ -704,28 +701,6 @@ body.dark-mode .delete-card-btn:hover {
     background: #b71c1c;
 }
 
-/* Dark mode for product card sections */
-body.dark-mode .primary-section,
-body.dark-mode .secondary-section {
-    background: #0f3460 !important;
-    color: #e0e0e0 !important;
-}
-
-body.dark-mode .primary-section h4,
-body.dark-mode .secondary-section h4 {
-    color: #8b9cff !important;
-}
-
-body.dark-mode .primary-section .data-label,
-body.dark-mode .secondary-section .data-label {
-    color: #ffffff !important;
-}
-
-body.dark-mode .primary-section .data-value,
-body.dark-mode .secondary-section .data-value {
-    color: #e0e0e0 !important;
-}
-
 /* Password Screen */
 .password-screen {
     position: fixed;
@@ -1210,43 +1185,12 @@ body.dark-mode .corner {
     }
     .search-section button {
         padding: 13px 26px;
+        font-size: 16px;
+    }
     .camera-btn {
         padding: 13px 22px;
         font-size: 22px;
     }
-}
-
-/* Custom scrollbar for menu */
-.menu-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.menu-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.menu-content::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 4px;
-}
-
-.menu-content::-webkit-scrollbar-thumb:hover {
-    background: #5568d3;
-}
-
-body.dark-mode .menu-content::-webkit-scrollbar-track {
-    background: #1a1a2e;
-}
-
-body.dark-mode .menu-content::-webkit-scrollbar-thumb {
-    background: #667eea;
-}
-
-body.dark-mode .menu-content::-webkit-scrollbar-thumb:hover {
-    background: #5568d3;
-}
-    </style>
 }
     </style>
 </head>
@@ -1260,33 +1204,27 @@ body.dark-mode .menu-content::-webkit-scrollbar-thumb:hover {
                 <div class="lock-icon" style="margin-bottom:0;">🔒</div>
                 <div id="locationDot" style="position:absolute;top:0;right:-4px;width:12px;height:12px;border-radius:50%;background:#ccc;box-shadow:0 0 6px rgba(0,0,0,0.3);transition:background 0.5s;border:2px solid white;" title="Location Status"></div>
             </div>
-            <!-- Guide ? button — left side -->
-            <button onclick="openUserGuide()" style="position:absolute;top:12px;left:15px;width:26px;height:26px;background:rgba(102,126,234,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;color:#667eea;border:1.5px solid #667eea;padding:0;" title="User Guide">?</button>
-            <!-- Calculator button — right side with logo -->
-            <button onclick="openCalculator()" style="position:absolute;top:12px;right:15px;width:32px;height:32px;background:rgba(102,126,234,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid #667eea;padding:0;font-size:18px;" title="Calculator">
-                <svg width="20" height="20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Background -->
+            <!-- Calculator button — top right -->
+            <button onclick="openCalculator()" style="position:absolute;top:12px;right:15px;width:36px;height:36px;background:rgba(102,126,234,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid #667eea;padding:0;-webkit-tap-highlight-color:transparent;" title="Calculator">
+                <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <rect width="100" height="100" fill="#667eea" rx="15"/>
-                    <!-- Top left: Plus -->
                     <rect x="10" y="10" width="35" height="35" fill="white" rx="5"/>
                     <rect x="20" y="24" width="5" height="7" fill="#ff0000"/>
                     <rect x="24" y="20" width="7" height="5" fill="#ff0000"/>
-                    <!-- Top right: Minus -->
                     <rect x="55" y="10" width="35" height="35" fill="white" rx="5"/>
                     <rect x="65" y="24" width="15" height="7" fill="#ff0000"/>
-                    <!-- Center: Equals -->
                     <circle cx="50" cy="50" r="20" fill="white" stroke="#667eea" stroke-width="3"/>
                     <rect x="38" y="46" width="12" height="3" fill="#ff0000"/>
                     <rect x="38" y="54" width="12" height="3" fill="#ff0000"/>
-                    <!-- Bottom left: X -->
                     <rect x="10" y="55" width="35" height="35" fill="white" rx="5"/>
                     <line x1="20" y1="65" x2="30" y2="80" stroke="#ff0000" stroke-width="3" stroke-linecap="round"/>
                     <line x1="30" y1="65" x2="20" y2="80" stroke="#ff0000" stroke-width="3" stroke-linecap="round"/>
-                    <!-- Bottom right: Lite text -->
                     <rect x="55" y="55" width="35" height="35" fill="white" rx="5"/>
                     <text x="72" y="82" font-size="14" font-weight="bold" fill="#ff0000" text-anchor="middle">Lite</text>
                 </svg>
             </button>
+            <!-- Guide ? button — left side -->
+            <div onclick="openUserGuide()" style="position:absolute;top:12px;left:15px;width:26px;height:26px;background:rgba(102,126,234,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;color:#667eea;border:1.5px solid #667eea;" title="User Guide">?</div>
             <h2>Digital Control Copy</h2>
             <p>Enter password to access</p>
             <div id="gpsWarning" style="display:none;color:#f44336;font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;"></div>
@@ -1295,15 +1233,15 @@ body.dark-mode .menu-content::-webkit-scrollbar-thumb:hover {
             <!-- Two fingerprint buttons -->
             <div style="display:flex;justify-content:center;gap:30px;margin-top:15px;">
                 <div style="text-align:center;">
-                    <button onclick="useFingerprintAuth('admin')" style="width:50px;height:50px;background:#667eea;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 10px rgba(102,126,234,0.4);border:none;padding:0;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <div onclick="useFingerprintAuth('admin')" style="width:50px;height:50px;background:#667eea;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 10px rgba(102,126,234,0.4);" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                         <span style="font-size:24px;">👆</span>
-                    </button>
+                    </div>
                     <p style="font-size:10px;color:#667eea;margin-top:4px;font-weight:600;">Admin</p>
                 </div>
                 <div style="text-align:center;">
-                    <button onclick="useFingerprintAuth('view')" style="width:50px;height:50px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 10px rgba(76,175,80,0.4);border:none;padding:0;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <div onclick="useFingerprintAuth('view')" style="width:50px;height:50px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 10px rgba(76,175,80,0.4);" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                         <span style="font-size:24px;">👆</span>
-                    </button>
+                    </div>
                     <p style="font-size:10px;color:#4CAF50;margin-top:4px;font-weight:600;">User</p>
                 </div>
             </div>
@@ -1363,6 +1301,9 @@ body.dark-mode .menu-content::-webkit-scrollbar-thumb:hover {
                 <span>📖 Guide</span>
             </div>
             <div class="menu-item" onclick="downloadAPK()"><span>📱 Download APK for Android</span></div>
+            <div class="menu-item" onclick="openApiSettings()">
+                <span>🔗 API / Bin ID Settings</span>
+            </div>
             <div class="menu-item" onclick="openCalculatorSettings()">
                 <span>⚙️ Calculator Settings</span>
             </div>
@@ -1917,72 +1858,71 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
             </div>
             <div class="section-content primary-section" data-section="primary">
                 <span class="primary-label">PRIMARY</span>
-                <div style="display: flex; gap: 20px;">
-                    <!-- Left Column -->
-                    <div style="flex: 1;">
-                        <div class="data-row">
-                            <span class="data-label">P Code:</span>
-                            <span class="data-value pcode-highlight">${highlightText(item.pcode, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Bulk G/Case:</span>
-                            <span class="data-value">${highlightText(item.bulkGCase, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Description / SKU:</span>
-                            <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">MRP:</span>
-                            <span class="data-value">
-                                <span class="price-old">Rs. ${highlightText(item.mrpOld, searchTerm)}</span> 
-                                <span class="price-new">Rs. ${highlightText(item.mrpNew, searchTerm)}</span>
-                            </span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Per Unit MRP:</span>
-                            <span class="data-value">Rs. ${highlightText(item.perUnitMrp, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Pouch G/Case:</span>
-                            <span class="data-value">${highlightText(item.pouchGCase, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Case G/Case:</span>
-                            <span class="data-value">${highlightText(item.caseGCase, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Z Partition:</span>
-                            <span class="data-value">${highlightText(item.zPartition, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Case / Pouch:</span>
-                            <span class="data-value">${highlightText(item.casePouch, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Pallet / Shipper:</span>
-                            <span class="data-value">${highlightText(item.palletShipper, searchTerm)}</span>
-                        </div>
+                <div class="data-row">
+                    <span class="data-label">P Code:</span>
+                    <span class="data-value pcode-highlight">${highlightText(item.pcode, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Bulk G/Case:</span>
+                    <span class="data-value">${highlightText(item.bulkGCase, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Description / SKU:</span>
+                    <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">MRP:</span>
+                    <span class="data-value">
+                        <span class="price-old">Rs. ${highlightText(item.mrpOld, searchTerm)}</span> 
+                        <span class="price-new">Rs. ${highlightText(item.mrpNew, searchTerm)}</span>
+                    </span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Per Unit MRP:</span>
+                    <span class="data-value">Rs. ${highlightText(item.perUnitMrp, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Pouch G/Case:</span>
+                    <span class="data-value">${highlightText(item.pouchGCase, searchTerm)}</span>
+                </div>
+
+                <div class="data-row">
+                    <span class="data-label">Case G/Case:</span>
+                    <span class="data-value">${highlightText(item.caseGCase, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Z Partition:</span>
+                    <span class="data-value">${highlightText(item.zPartition, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Case / Pouch:</span>
+                    <span class="data-value">${highlightText(item.casePouch, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Pallet / Shipper:</span>
+                    <span class="data-value">${highlightText(item.palletShipper, searchTerm)}</span>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">Primary Weight</h4>
+                    <div class="data-row">
+                        <span class="data-label">Description / Variant / SKU:</span>
+                        <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
                     </div>
-                    <!-- Right Column - Primary Weight -->
-                    <div style="flex: 1; border-left: 1px solid #eee; padding-left: 20px;">
-                        <h4 style="color: #667eea; margin-bottom: 10px; margin-top: 0;">Primary Weight</h4>
-                        <div class="data-row">
-                            <span class="data-label">LSL:</span>
-                            <span class="data-value">${highlightText(item.lsl, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Target:</span>
-                            <span class="data-value">${highlightText(item.target, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">USL:</span>
-                            <span class="data-value">${highlightText(item.usl, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Tera:</span>
-                            <span class="data-value">${highlightText(item.tera, searchTerm)}</span>
-                        </div>
+                    <div class="data-row">
+                        <span class="data-label">LSL:</span>
+                        <span class="data-value">${highlightText(item.lsl, searchTerm)}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Target:</span>
+                        <span class="data-value">${highlightText(item.target, searchTerm)}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">USL:</span>
+                        <span class="data-value">${highlightText(item.usl, searchTerm)}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Tera:</span>
+                        <span class="data-value">${highlightText(item.tera, searchTerm)}</span>
                     </div>
                 </div>
                 ${adminBtns}
@@ -1991,59 +1931,56 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
             </div>
             <div class="section-content secondary-section" data-section="secondary">
                 <span class="secondary-label">SECONDARY</span>
-                <div style="display: flex; gap: 20px;">
-                    <!-- Left Column -->
-                    <div style="flex: 1;">
-                        <div class="data-row">
-                            <span class="data-label">P Code:</span>
-                            <span class="data-value pcode-highlight">${highlightText(item.pcode, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Description / SKU:</span>
-                            <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Pouch G/Case:</span>
-                            <span class="data-value">${highlightText(item.secPouchGCase || item.pouchGCase, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Case G/Case:</span>
-                            <span class="data-value">${highlightText(item.secCaseGCase || item.caseGCase, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Z Partition:</span>
-                            <span class="data-value">${highlightText(item.secZPartition || item.zPartition, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Case / Pouch:</span>
-                            <span class="data-value">${highlightText(item.secCasePouch || item.casePouch, searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Pallet / Shipper:</span>
-                            <span class="data-value">${highlightText(item.secPalletShipper || item.palletShipper, searchTerm)}</span>
-                        </div>
+                <div class="data-row">
+                    <span class="data-label">P Code:</span>
+                    <span class="data-value pcode-highlight">${highlightText(item.pcode, searchTerm)}</span>
+                </div>
+
+                <div class="data-row">
+                    <span class="data-label">Description / SKU:</span>
+                    <span class="data-value">${highlightText(item.sku, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Pouch G/Case:</span>
+                    <span class="data-value">${highlightText(item.secPouchGCase || item.pouchGCase, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Case G/Case:</span>
+                    <span class="data-value">${highlightText(item.secCaseGCase || item.caseGCase, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Z Partition:</span>
+                    <span class="data-value">${highlightText(item.secZPartition || item.zPartition, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Case / Pouch:</span>
+                    <span class="data-value">${highlightText(item.secCasePouch || item.casePouch, searchTerm)}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Pallet / Shipper:</span>
+                    <span class="data-value">${highlightText(item.secPalletShipper || item.palletShipper, searchTerm)}</span>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #764ba2; margin-bottom: 10px;">Secondary Weight</h4>
+                    <div class="data-row">
+                        <span class="data-label">LSL:</span>
+                        <span class="data-value">${highlightText(item.secLsl || item.lsl || '-', searchTerm)}</span>
                     </div>
-                    <!-- Right Column - Secondary Weight -->
-                    <div style="flex: 1; border-left: 1px solid #eee; padding-left: 20px;">
-                        <h4 style="color: #764ba2; margin-bottom: 10px; margin-top: 0;">Secondary Weight</h4>
-                        <div class="data-row">
-                            <span class="data-label">LSL:</span>
-                            <span class="data-value">${highlightText(item.secLsl || item.lsl || '-', searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Target:</span>
-                            <span class="data-value">${highlightText(item.secTarget || item.target || '-', searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">USL:</span>
-                            <span class="data-value">${highlightText(item.secUsl || item.usl || '-', searchTerm)}</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Tera:</span>
-                            <span class="data-value">${highlightText(item.secTera || item.tera || '-', searchTerm)}</span>
-                        </div>
+                    <div class="data-row">
+                        <span class="data-label">Target:</span>
+                        <span class="data-value">${highlightText(item.secTarget || item.target || '-', searchTerm)}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">USL:</span>
+                        <span class="data-value">${highlightText(item.secUsl || item.usl || '-', searchTerm)}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Tera:</span>
+                        <span class="data-value">${highlightText(item.secTera || item.tera || '-', searchTerm)}</span>
                     </div>
                 </div>
+                
                 ${adminBtns}
                 <button class="share-card-btn" onclick="shareProduct('${item.pcode}')">📤 Share Product</button>
                 ${(item.addedOn || item.addedBy) ? `<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:6px;border-top:1px solid #eee;"><span style="font-size:11px;color:#888;">👤 ${item.addedBy || ''}</span><span style="font-size:11px;color:#aaa;">📅 ${item.addedOn || ''}</span></div>` : ''}
@@ -2068,6 +2005,7 @@ function editRecord(pcode) {
     // Pre-fill form with existing data
     setTimeout(() => {
         document.getElementById('pcode').value = item.pcode;
+        document.getElementById('pcode').readOnly = true; // Can't change PCode
         document.getElementById('sku').value = item.sku || '';
         document.getElementById('bulkGCase').value = item.bulkGCase || '';
         document.getElementById('mrpOld').value = item.mrpOld || '';
@@ -3471,32 +3409,100 @@ function openFullGuide() {
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
-// Calculator Modal - Full Production Calculator
-function openCalculator() {
-    const existing = document.getElementById('calculatorModal');
-    if (existing) { existing.remove(); return; }
-    const modal = document.createElement('div');
-    modal.id = 'calculatorModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;padding:0;box-sizing:border-box;z-index:99999;';
-    modal.innerHTML = `
-        <div style="background:white;border-radius:0;width:100%;height:100%;overflow:hidden;padding:0;box-shadow:none;display:flex;flex-direction:column;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#667eea;color:white;flex-shrink:0;">
-                <h2 style="margin:0;font-size:16px;">🏭 Production Calculator</h2>
-                <button onclick="document.getElementById('calculatorModal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:white;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">&times;</button>
-            </div>
-            <iframe src="prodacson calkuletar.html" style="flex:1;border:none;width:100%;height:100%;background:white;"></iframe>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
 // Download APK function placeholder
 function downloadAPK() {
     alert('📱 APK Download\n\nTo create APK:\n\n1. Use Cordova (see APK-KAISE-BANAYE.txt)\n2. Or use online tools like:\n   - PWA Builder (pwabuilder.com)\n   - APK Generator\n\n3. Upload to GitHub Pages first\n4. Then convert to APK');
     toggleMenu();
 }
 
+
+// ===== CALCULATOR =====
+function openCalculator() {
+    const existing = document.getElementById('calcModal');
+    if (existing) { existing.remove(); document.body.style.overflow = ''; return; }
+    const modal = document.createElement('div');
+    modal.id = 'calcModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99999;display:flex;flex-direction:column;overflow:hidden;';
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#667eea;color:white;flex-shrink:0;min-height:50px;';
+    header.innerHTML = '<span style="font-size:16px;font-weight:700;color:white;">🏭 Production Calculator</span><button onclick="document.getElementById(\'calcModal\').remove();document.body.style.overflow=\'\';" style="background:rgba(255,255,255,0.25);border:none;font-size:24px;cursor:pointer;color:white;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">&times;</button>';
+    const iframe = document.createElement('iframe');
+    iframe.src = 'calculator.html';
+    iframe.style.cssText = 'border:none;width:100%;display:block;background:white;';
+    iframe.setAttribute('allowfullscreen', '');
+    modal.appendChild(header);
+    modal.appendChild(iframe);
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    function resize() { iframe.style.height = (window.innerHeight - header.offsetHeight) + 'px'; }
+    resize();
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', resize);
+}
+
+function openCalculatorSettings() {
+    toggleMenu();
+    const modal = document.createElement('div');
+    modal.id = 'calculatorSettingsModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;overflow-y:auto;';
+    const formulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
+    let formulaRows = '';
+    Object.keys(formulas).forEach(key => {
+        const f = formulas[key];
+        formulaRows += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f5f5f5;border-radius:8px;margin-bottom:8px;">
+            <div><strong>${key}</strong> — ${f.pouchPerMin} pouch/min, ${f.unit||'Pouch'}</div>
+            <button onclick="deleteCalcFormula('${key}')" style="background:#f44336;color:white;border:none;padding:4px 10px;border-radius:5px;cursor:pointer;">🗑</button>
+        </div>`;
+    });
+    modal.innerHTML = `
+    <div style="background:white;border-radius:12px;padding:20px;max-width:500px;width:92%;max-height:90vh;overflow-y:auto;margin:auto;">
+        <h2 style="margin-top:0;color:#333;">⚙️ Calculator Settings</h2>
+        <div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:15px;font-size:13px;color:#1565c0;border-left:4px solid #1565c0;">
+            Formulas sync to server — all users see updates automatically.
+        </div>
+        <h3 style="color:#667eea;margin-bottom:10px;">📋 Existing Formulas</h3>
+        <div id="formulaList">${formulaRows || '<p style="color:#999;font-size:13px;">No formulas yet.</p>'}</div>
+        <hr style="margin:15px 0;">
+        <h3 style="color:#667eea;margin-bottom:10px;">➕ Add / Edit Formula</h3>
+        <input id="fName" placeholder="Weight Name (e.g. 100g)" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;margin-bottom:10px;font-size:14px;">
+        <input id="fPPM" type="number" placeholder="Pouches per minute" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;margin-bottom:10px;font-size:14px;">
+        <input id="fUnit" placeholder="Unit (default: Pouch)" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;margin-bottom:15px;font-size:14px;">
+        <div style="display:flex;gap:10px;">
+            <button onclick="saveCalcFormula()" style="flex:1;padding:12px;background:#667eea;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">💾 Save</button>
+            <button onclick="syncCalcFormulas()" style="flex:1;padding:12px;background:#4caf50;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">☁️ Sync</button>
+            <button onclick="document.getElementById('calculatorSettingsModal').remove()" style="flex:1;padding:12px;background:#999;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">✖ Close</button>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function saveCalcFormula() {
+    const name = document.getElementById('fName').value.trim();
+    const ppm  = parseFloat(document.getElementById('fPPM').value);
+    const unit = document.getElementById('fUnit').value.trim() || 'Pouch';
+    if (!name || !ppm) { alert('Name and pouches/min required!'); return; }
+    const formulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
+    formulas[name] = { pouchPerMin: ppm, unit };
+    localStorage.setItem('customFormulas', JSON.stringify(formulas));
+    alert('✅ Formula saved!');
+    document.getElementById('calculatorSettingsModal').remove();
+    openCalculatorSettings();
+}
+
+function deleteCalcFormula(name) {
+    if (!confirm('Delete formula "' + name + '"?')) return;
+    const formulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
+    delete formulas[name];
+    localStorage.setItem('customFormulas', JSON.stringify(formulas));
+    document.getElementById('calculatorSettingsModal').remove();
+    openCalculatorSettings();
+}
+
+function syncCalcFormulas() {
+    if (!confirm('Sync formulas to server? All users will see updates.')) return;
+    syncToServer().then(() => { showSyncToast('✅ Formulas synced!', '#4caf50'); });
+}
 
 function logoutApp() {
     toggleMenu();
@@ -3580,421 +3586,6 @@ function clearApiSettings() {
     localStorage.removeItem('jb_bin_id');
     document.getElementById('apiSettingsModal').remove();
     showSuccessPopup('API settings cleared. Offline mode.');
-}
-
-// Calculator Settings
-function openCalculatorSettings() {
-    toggleMenu();
-    const modal = document.createElement('div');
-    modal.id = 'calculatorSettingsModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;overflow-y:auto;';
-    
-    // Load existing formulas from localStorage
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    const allFormulas = JSON.parse(localStorage.getItem('weights') || '["S1 70g","300g","500g","850g","900g","1kg","2kg","3kg","3.2kg","4kg","5kg","6kg"]');
-    
-    // Get all formulas (default + custom)
-    const allFormulasObj = JSON.parse(localStorage.getItem('mc_formulas') || '{}');
-    
-    const formulasList = Object.keys(customFormulas).map(key => {
-        const f = customFormulas[key];
-        return `<div style="background:#f5f5f5;padding:12px;border-radius:6px;margin-bottom:10px;font-size:12px;border-left:4px solid #667eea;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <strong style="color:#333;">${key}</strong>
-                <div style="display:flex;gap:5px;">
-                    <button onclick="editFormula('${key}')" style="background:#667eea;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">✏️ Edit</button>
-                    <button onclick="deleteFormula('${key}')" style="background:#f44336;color:white;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🗑️ Delete</button>
-                </div>
-            </div>
-            <div style="color:#666;font-size:11px;">
-                • ${f.pouchToShipper} ${f.unit}/Shipper<br>
-                • ${f.shipperToPallet} Shipper/Pallet<br>
-                • ${f.pouchToPallet} ${f.unit}/Pallet<br>
-                • Speed: ${f.speed > 0 ? f.speed + ' ' + f.unit + '/min' : 'Not Set'}
-            </div>
-        </div>`;
-    }).join('');
-    
-    // Create weight options dropdown
-    const weightOptions = allFormulas.map(w => `<option value="${w}">${w}</option>`).join('');
-    
-    modal.innerHTML = `
-        <div style="background:white;border-radius:12px;padding:20px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;margin:auto;">
-            <h2 style="margin-top:0;color:#333;">⚙️ Calculator Settings</h2>
-            
-            <div style="background:#e3f2fd;padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;color:#1565c0;border-left:4px solid #1565c0;">
-                <strong>📝 Formula Management:</strong> Select weight to edit existing formula, or add new formula below.
-            </div>
-            
-            <!-- Select & Edit Existing Formula -->
-            <div style="background:#f0f7ff;padding:15px;border-radius:8px;margin-bottom:20px;border:2px solid #2196F3;">
-                <h3 style="margin-top:0;color:#333;margin-bottom:15px;">🔍 Select Weight to Edit</h3>
-                
-                <div style="margin-bottom:12px;">
-                    <label style="display:block;font-weight:600;margin-bottom:8px;color:#333;font-size:13px;">Choose Weight</label>
-                    <select id="selectWeightDropdown" onchange="loadWeightFormula()" style="width:100%;padding:10px;border:2px solid #2196F3;border-radius:6px;box-sizing:border-box;font-size:14px;background:white;cursor:pointer;">
-                        <option value="">-- Select a weight --</option>
-                        ${weightOptions}
-                    </select>
-                </div>
-                
-                <!-- Formula Display -->
-                <div id="formulaDisplay" style="display:none;background:white;padding:12px;border-radius:6px;border:1px solid #2196F3;margin-bottom:12px;">
-                    <div style="font-size:12px;color:#333;">
-                        <div style="margin-bottom:8px;"><strong>Current Formula:</strong></div>
-                        <div id="formulaInfo" style="color:#666;font-size:11px;line-height:1.6;"></div>
-                    </div>
-                </div>
-                
-                <!-- Edit Fields -->
-                <div id="editFields" style="display:none;">
-                    <div style="margin-bottom:12px;">
-                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Unit Name</label>
-                        <input type="text" id="editUnitName" placeholder="Pouch/Met/Bag" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                    </div>
-                    
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                        <div>
-                            <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Unit per Shipper</label>
-                            <input type="number" id="editUnitPerShipper" min="1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                        </div>
-                        <div>
-                            <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Shipper per Pallet</label>
-                            <input type="number" id="editShipperPerPallet" min="1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Speed (Unit/min)</label>
-                        <input type="number" id="editSpeedValue" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                    </div>
-                    
-                    <div style="display:flex;gap:10px;margin-bottom:15px;">
-                        <button onclick="updateExistingFormula()" style="flex:1;padding:10px;background:#4caf50;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;">✅ Update Formula</button>
-                        <button onclick="clearWeightSelection()" style="flex:1;padding:10px;background:#999;color:white;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;">🔄 Clear</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Add New Formula Section -->
-            <div style="background:#f9f9f9;padding:15px;border-radius:8px;margin-bottom:20px;border:2px solid #ddd;">
-                <h3 style="margin-top:0;color:#333;margin-bottom:15px;">➕ Add New Formula</h3>
-                
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                    <div>
-                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Weight Name</label>
-                        <input type="text" id="formulaWeightName" placeholder="e.g., 750g" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                    </div>
-                    <div>
-                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Unit Name</label>
-                        <input type="text" id="formulaUnit" placeholder="Pouch/Met/Bag" value="Pouch" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                    </div>
-                </div>
-                
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-                    <div>
-                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Unit per Shipper</label>
-                        <input type="number" id="formulaPouchToShipper" placeholder="24" min="1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                    </div>
-                    <div>
-                        <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Shipper per Pallet</label>
-                        <input type="number" id="formulaShipperToPallet" placeholder="42" min="1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                    </div>
-                </div>
-                
-                <div>
-                    <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Speed (Unit/min)</label>
-                    <input type="number" id="formulaSpeed" placeholder="40" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;margin-bottom:15px;">
-                </div>
-                
-                <div style="display:flex;gap:10px;">
-                    <button onclick="saveCalculatorFormula()" style="flex:1;padding:12px;background:#667eea;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">💾 Save Formula</button>
-                    <button onclick="clearFormulaForm()" style="flex:1;padding:12px;background:#999;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">🔄 Clear</button>
-                </div>
-            </div>
-            
-            <!-- Existing Formulas -->
-            <div style="margin-bottom:20px;">
-                <h3 style="margin-top:0;color:#333;margin-bottom:15px;">📋 Custom Formulas (${Object.keys(customFormulas).length})</h3>
-                ${formulasList || '<p style="color:#999;font-size:13px;padding:10px;background:#f5f5f5;border-radius:6px;">No custom formulas yet. Add one above!</p>'}
-            </div>
-            
-            <!-- Action Buttons -->
-            <div style="display:flex;gap:10px;margin-top:20px;border-top:2px solid #ddd;padding-top:15px;">
-                <button onclick="syncCalculatorFormulas()" style="flex:1;padding:12px;background:#4caf50;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">☁️ Sync to Server</button>
-                <button onclick="openCalculatorModal()" style="flex:1;padding:12px;background:#2196F3;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">📊 Open Calculator</button>
-                <button onclick="document.getElementById('calculatorSettingsModal').remove()" style="flex:1;padding:12px;background:#999;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">✖ Close</button>
-            </div>
-        </div>`;
-    document.body.appendChild(modal);
-}
-
-function loadWeightFormula() {
-    const weight = document.getElementById('selectWeightDropdown').value;
-    const formulaDisplay = document.getElementById('formulaDisplay');
-    const editFields = document.getElementById('editFields');
-    
-    if (!weight) {
-        formulaDisplay.style.display = 'none';
-        editFields.style.display = 'none';
-        return;
-    }
-    
-    // Try to get formula from localStorage
-    let formula = null;
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    
-    if (customFormulas[weight]) {
-        formula = customFormulas[weight];
-    } else {
-        // Try to get from mc_formulas
-        const mcFormulas = JSON.parse(localStorage.getItem('mc_formulas') || '{}');
-        if (mcFormulas.formulas && mcFormulas.formulas[weight]) {
-            formula = mcFormulas.formulas[weight];
-        }
-    }
-    
-    if (!formula) {
-        alert('❌ Formula not found for ' + weight);
-        return;
-    }
-    
-    // Display current formula
-    const formulaInfo = document.getElementById('formulaInfo');
-    formulaInfo.innerHTML = `
-        • ${formula.pouchToShipper} ${formula.unit}/Shipper<br>
-        • ${formula.shipperToPallet} Shipper/Pallet<br>
-        • ${formula.pouchToPallet} ${formula.unit}/Pallet<br>
-        • Speed: ${formula.speed > 0 ? formula.speed + ' ' + formula.unit + '/min' : 'Not Set'}
-    `;
-    
-    // Load into edit fields
-    document.getElementById('editUnitName').value = formula.unit || 'Pouch';
-    document.getElementById('editUnitPerShipper').value = formula.pouchToShipper;
-    document.getElementById('editShipperPerPallet').value = formula.shipperToPallet;
-    document.getElementById('editSpeedValue').value = formula.speed || 0;
-    
-    formulaDisplay.style.display = 'block';
-    editFields.style.display = 'block';
-}
-
-function updateExistingFormula() {
-    const weight = document.getElementById('selectWeightDropdown').value;
-    
-    if (!weight) {
-        alert('❌ Please select a weight');
-        return;
-    }
-    
-    const unit = document.getElementById('editUnitName').value.trim() || 'Pouch';
-    const pouchToShipper = parseInt(document.getElementById('editUnitPerShipper').value);
-    const shipperToPallet = parseInt(document.getElementById('editShipperPerPallet').value);
-    const speed = parseInt(document.getElementById('editSpeedValue').value) || 0;
-    
-    if (!pouchToShipper || pouchToShipper < 1) {
-        alert('❌ Please enter valid Unit per Shipper');
-        return;
-    }
-    if (!shipperToPallet || shipperToPallet < 1) {
-        alert('❌ Please enter valid Shipper per Pallet');
-        return;
-    }
-    
-    // Update in customFormulas
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    customFormulas[weight] = {
-        pouchToShipper,
-        shipperToPallet,
-        pouchToPallet: pouchToShipper * shipperToPallet,
-        speed,
-        unit
-    };
-    
-    localStorage.setItem('customFormulas', JSON.stringify(customFormulas));
-    
-    alert(`✅ Formula "${weight}" updated!`);
-    clearWeightSelection();
-    openCalculatorSettings(); // Refresh
-}
-
-function clearWeightSelection() {
-    document.getElementById('selectWeightDropdown').value = '';
-    document.getElementById('formulaDisplay').style.display = 'none';
-    document.getElementById('editFields').style.display = 'none';
-}
-
-function clearFormulaForm() {
-    document.getElementById('formulaWeightName').value = '';
-    document.getElementById('formulaUnit').value = 'Pouch';
-    document.getElementById('formulaPouchToShipper').value = '';
-    document.getElementById('formulaShipperToPallet').value = '';
-    document.getElementById('formulaSpeed').value = '';
-    document.getElementById('formulaWeightName').focus();
-}
-
-function editFormula(name) {
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    const formula = customFormulas[name];
-    
-    if (!formula) {
-        alert('❌ Formula not found');
-        return;
-    }
-    
-    // Close current modal
-    const currentModal = document.getElementById('calculatorSettingsModal');
-    if (currentModal) currentModal.remove();
-    
-    // Create edit modal
-    const editModal = document.createElement('div');
-    editModal.id = 'editFormulaModal';
-    editModal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;overflow-y:auto;';
-    
-    editModal.innerHTML = `
-        <div style="background:white;border-radius:12px;padding:20px;max-width:500px;width:90%;margin:auto;">
-            <h2 style="margin-top:0;color:#333;">✏️ Edit Formula: ${name}</h2>
-            
-            <div style="background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;color:#856404;border-left:4px solid #ffc107;">
-                <strong>📝 Edit the formula details below</strong>
-            </div>
-            
-            <div style="margin-bottom:12px;">
-                <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Unit Name</label>
-                <input type="text" id="editUnit" value="${formula.unit || 'Pouch'}" placeholder="Pouch/Met/Bag" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-            </div>
-            
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-                <div>
-                    <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Unit per Shipper</label>
-                    <input type="number" id="editPouchToShipper" value="${formula.pouchToShipper}" min="1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                </div>
-                <div>
-                    <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Shipper per Pallet</label>
-                    <input type="number" id="editShipperToPallet" value="${formula.shipperToPallet}" min="1" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-                </div>
-            </div>
-            
-            <div style="margin-bottom:15px;">
-                <label style="display:block;font-weight:600;margin-bottom:5px;color:#333;font-size:13px;">Speed (Unit/min)</label>
-                <input type="number" id="editSpeed" value="${formula.speed || 0}" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:14px;">
-            </div>
-            
-            <div style="display:flex;gap:10px;">
-                <button onclick="updateFormula('${name}')" style="flex:1;padding:12px;background:#4caf50;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">✅ Update</button>
-                <button onclick="document.getElementById('editFormulaModal').remove();openCalculatorSettings();" style="flex:1;padding:12px;background:#999;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600;">❌ Cancel</button>
-            </div>
-        </div>`;
-    
-    document.body.appendChild(editModal);
-}
-
-function updateFormula(oldName) {
-    const unit = document.getElementById('editUnit').value.trim() || 'Pouch';
-    const pouchToShipper = parseInt(document.getElementById('editPouchToShipper').value);
-    const shipperToPallet = parseInt(document.getElementById('editShipperToPallet').value);
-    const speed = parseInt(document.getElementById('editSpeed').value) || 0;
-    
-    if (!pouchToShipper || pouchToShipper < 1) {
-        alert('❌ Please enter valid Unit per Shipper');
-        return;
-    }
-    if (!shipperToPallet || shipperToPallet < 1) {
-        alert('❌ Please enter valid Shipper per Pallet');
-        return;
-    }
-    
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    
-    // Delete old formula if name changed
-    if (oldName in customFormulas) {
-        delete customFormulas[oldName];
-    }
-    
-    // Add updated formula
-    customFormulas[oldName] = {
-        pouchToShipper,
-        shipperToPallet,
-        pouchToPallet: pouchToShipper * shipperToPallet,
-        speed,
-        unit
-    };
-    
-    localStorage.setItem('customFormulas', JSON.stringify(customFormulas));
-    
-    alert(`✅ Formula "${oldName}" updated!`);
-    document.getElementById('editFormulaModal').remove();
-    openCalculatorSettings(); // Refresh
-}
-
-function saveCalculatorFormula() {
-    const name = document.getElementById('formulaWeightName').value.trim();
-    const unit = document.getElementById('formulaUnit').value.trim() || 'Pouch';
-    const pouchToShipper = parseInt(document.getElementById('formulaPouchToShipper').value);
-    const shipperToPallet = parseInt(document.getElementById('formulaShipperToPallet').value);
-    const speed = parseInt(document.getElementById('formulaSpeed').value) || 0;
-    
-    if (!name) {
-        alert('❌ Please enter weight name');
-        return;
-    }
-    if (!pouchToShipper || pouchToShipper < 1) {
-        alert('❌ Please enter valid Unit per Shipper');
-        return;
-    }
-    if (!shipperToPallet || shipperToPallet < 1) {
-        alert('❌ Please enter valid Shipper per Pallet');
-        return;
-    }
-    
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    customFormulas[name] = {
-        pouchToShipper,
-        shipperToPallet,
-        pouchToPallet: pouchToShipper * shipperToPallet,
-        speed,
-        unit
-    };
-    
-    localStorage.setItem('customFormulas', JSON.stringify(customFormulas));
-    
-    alert(`✅ Formula "${name}" saved!`);
-    clearFormulaForm();
-    openCalculatorSettings(); // Refresh the modal
-}
-
-function deleteFormula(name) {
-    if (!confirm(`Delete formula "${name}"?`)) return;
-    
-    const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
-    delete customFormulas[name];
-    localStorage.setItem('customFormulas', JSON.stringify(customFormulas));
-    
-    alert(`🗑️ Formula "${name}" deleted!`);
-    openCalculatorSettings(); // Refresh the modal
-}
-
-function syncCalculatorFormulas() {
-    if (!confirm('Sync all formulas to server? All users will see the updates.')) return;
-    
-    // Sync to server
-    syncToServer();
-    
-    alert('☁️ Formulas synced to server! All users will see the updates.');
-}
-
-function openCalculatorModal() {
-    const modal = document.createElement('div');
-    modal.id = 'calculatorModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:10000;';
-    modal.innerHTML = `
-        <div style="width:95%;height:95%;background:white;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:15px;background:#667eea;color:white;">
-                <h3 style="margin:0;">Production Calculator</h3>
-                <button onclick="document.getElementById('calculatorModal').remove();document.getElementById('calculatorSettingsModal').remove();" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">✖</button>
-            </div>
-            <iframe src="prodacson calkuletar.html" style="flex:1;border:none;width:100%;"></iframe>
-        </div>`;
-    document.body.appendChild(modal);
 }
 
 // ============================================================
@@ -4273,41 +3864,26 @@ function isLocationAllowed(callback) {
 // HOW TO SETUP:
 //   1. Create a free account at jsonbin.io
 //   2. Copy API Key (Account > API Keys)
-// ============================================================
-// HOW TO SETUP SECURELY (API Key NOT visible in code):
-// ============================================================
-// 1. Create account at jsonbin.io
-// 2. Get API Key from Account > API Keys
-// 3. Create new Bin (empty JSON {})
-// 4. Copy Bin ID from URL
-// 5. Add to config.js (NOT in HTML or GitHub)
+//   3. Create a new Bin (New Bin > empty JSON {})
+//   4. Copy Bin ID (found in the URL)
+//   5. Enter API Key and Bin ID in App Settings
 // ============================================================
 
-// API keys are loaded from config.js (not visible to users)
-// config.js is in .gitignore and never committed to GitHub
+// API keys are not in HTML — stored in localStorage
+// Admin settings se enter karo — GitHub pe leak nahi hogi
 function getApiKey() {
-    // First check config.js (admin's local config)
-    if (typeof CONFIG !== 'undefined' && CONFIG.jsonbin && CONFIG.jsonbin.apiKey) {
-        return CONFIG.jsonbin.apiKey;
-    }
-    
-    // Fallback to localStorage (user entered via settings)
+    // Check config.js first (local file, not pushed to GitHub)
+    if (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.apiKey)
+        return JSONBIN_CONFIG.apiKey;
+    // Then check localStorage (saved from settings)
     return localStorage.getItem('jb_api_key') || '';
 }
-
 function getBinId() {
-    // First check config.js (admin's local config)
-    if (typeof CONFIG !== 'undefined' && CONFIG.jsonbin && CONFIG.jsonbin.binId) {
-        return CONFIG.jsonbin.binId;
-    }
-    
-    // Fallback to localStorage (user entered via settings)
-    const userBin = localStorage.getItem('jb_bin_id');
-    if (userBin) return userBin;
-    
-    // Fallback to public bin if available
-    return localStorage.getItem('jb_public_bin_id') || '';
-}
+    // Check config.js first
+    if (typeof JSONBIN_CONFIG !== 'undefined' && JSONBIN_CONFIG.binId)
+        return JSONBIN_CONFIG.binId;
+    // Then check localStorage
+    return localStorage.getItem('jb_bin_id') || '';}
 
 function isJsonBinConfigured() {
     return getApiKey() !== '' && getBinId() !== '';
@@ -4345,9 +3921,11 @@ async function syncFromServer() {
         }
         const json = await res.json();
         const rec = json.record || json || {};
-        // Product records sync — server data is source of truth
+        // Product records sync
         const serverData = rec.records || {};
-        localStorage.setItem('mc_data_v1', JSON.stringify(serverData));
+        const localData = JSON.parse(localStorage.getItem('mc_data_v1') || '{}');
+        const merged = Object.assign({}, localData, serverData);
+        localStorage.setItem('mc_data_v1', JSON.stringify(merged));
         // Location settings sync — only overwrite if server has them
         if (rec.locationSettings) {
             const ls = rec.locationSettings;
@@ -4358,17 +3936,13 @@ async function syncFromServer() {
             if (ls.loc_radius) localStorage.setItem('loc_radius', ls.loc_radius);
             if (ls.loc_enabled !== undefined) localStorage.setItem('loc_enabled', ls.loc_enabled);
         }
-        // Custom calculator formulas sync — admin adds, users get them
-        if (rec.customFormulas) {
-            localStorage.setItem('customFormulas', JSON.stringify(rec.customFormulas));
-        }
         // View password sync — when admin updates, user devices get it too
         if (rec.viewPassword) {
             localStorage.setItem('view_password', rec.viewPassword);
         }
-        const count = Object.keys(serverData).length;
+        const count = Object.keys(merged).length;
         showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
-        return serverData;
+        return merged;
     } catch (err) {
         showSyncToast('❌ ' + err.message, '#f44336');
     }
@@ -4386,8 +3960,6 @@ async function syncToServer() {
             loc_radius: localStorage.getItem('loc_radius') || '100',
             loc_enabled: localStorage.getItem('loc_enabled') || 'false'
         };
-        // Include custom calculator formulas
-        const customFormulas = JSON.parse(localStorage.getItem('customFormulas') || '{}');
         const viewPassword = localStorage.getItem('view_password') || '2468';
         const res = await fetch(`https://api.jsonbin.io/v3/b/${getBinId()}`, {
             method: 'PUT',
@@ -4395,7 +3967,7 @@ async function syncToServer() {
                 'Content-Type': 'application/json',
                 'X-Access-Key': getApiKey()
             },
-            body: JSON.stringify({ records: data, locationSettings, customFormulas, viewPassword })
+            body: JSON.stringify({ records: data, locationSettings, viewPassword })
         });
         if (!res.ok) {
             if (res.status === 401) throw new Error('401 - API Key wrong!');
@@ -4409,6 +3981,32 @@ async function syncToServer() {
 }
 
 // App unlock
+let _syncPollInterval = null;
+
+function startAutoSync() {
+    if (_syncPollInterval) return; // already running
+    if (!getBinId()) return;
+    _syncPollInterval = setInterval(async () => {
+        if (!window._userRole) { stopAutoSync(); return; }
+        const before = JSON.stringify(JSON.parse(localStorage.getItem('mc_data_v1') || '{}'));
+        await syncFromServer();
+        const after = JSON.stringify(JSON.parse(localStorage.getItem('mc_data_v1') || '{}'));
+        // If data changed, refresh search results silently
+        if (before !== after) {
+            const term = document.getElementById('searchInput')?.value?.trim();
+            if (term) searchData();
+            showSyncToast('🔄 Data updated from server', '#667eea');
+        }
+    }, 120000); // every 2 minutes
+}
+
+function stopAutoSync() {
+    if (_syncPollInterval) {
+        clearInterval(_syncPollInterval);
+        _syncPollInterval = null;
+    }
+}
+
 function unlockApp(role) {
     window._userRole = role || 'admin';
     document.getElementById('passwordScreen').style.display = 'none';
@@ -4417,12 +4015,13 @@ function unlockApp(role) {
     loadTheme();
     showEmptyState();
     applyRoleAccess(window._userRole);
-    // Sync once on login
+    // Sync on login then start auto polling
     if (getBinId()) {
         syncFromServer().then(() => {
             const term = document.getElementById('searchInput')?.value?.trim();
             if (term) searchData();
         });
+        startAutoSync();
     }
 }
 </script>
