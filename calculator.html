@@ -1210,17 +1210,17 @@
     
     <div class="container">
         <header>
-            <h1>🏭 Production Calculator</h1>
+            <h1 style="flex:1;">&#127981; Production Calculator</h1>
+            <button class="calc-dcc-btn" onclick="window.location.href='vvv.html'" title="Switch to Digital Control Copy">&#8644;</button>
             <div class="header-right">
                 <div class="dark-mode-toggle" onclick="refreshAll()" title="Refresh All">
-                    <span id="refreshIcon">↻</span>
+                    <span id="refreshIcon">&#8635;</span>
                 </div>
                 <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Mode">
-                    <span id="darkModeIcon">☀️</span>
+                    <span id="darkModeIcon">&#9728;</span>
                 </div>
             </div>
         </header>
-
         <!-- 10% Range Boxes at Top with Weight Selector -->
         <div class="range-boxes">
             <div class="range-box lowest">
@@ -1229,14 +1229,16 @@
             </div>
             
             <!-- Weight Selector in Middle -->
-            <div class="weight-selector">
-                <span class="weight-label">⚖️ WEIGHT</span>
+            <div class="weight-selector" onclick="toggleWeightList()" style="cursor:pointer;position:relative;">
+                <span class="weight-label">&#9878;&#65039; WEIGHT</span>
                 <div class="weight-controls">
-                    <span class="weight-arrow" onclick="previousWeight()">◀</span>
                     <div class="weight-value">
                         <span id="currentWeight">1kg</span>
+                        <span style="font-size:12px;margin-left:4px;opacity:0.8;">&#9660;</span>
                     </div>
-                    <span class="weight-arrow" onclick="nextWeight()">▶</span>
+                </div>
+                <!-- Weight Dropdown List -->
+                <div id="weightList" style="display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:white;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:999;min-width:140px;max-height:280px;overflow-y:auto;margin-top:6px;">
                 </div>
             </div>
             
@@ -1352,6 +1354,7 @@ w2QjzsKE==" type="audio/wav">
 
         function changeWeightManually() {
             const dropdown = document.getElementById('weightDropdown');
+            if (!dropdown) return;
             currentWeightIndex = parseInt(dropdown.value);
             const currentWeight = weights[currentWeightIndex];
             const formula = getCurrentFormula();
@@ -1502,6 +1505,7 @@ w2QjzsKE==" type="audio/wav">
         // Update Weight Dropdown
         function updateWeightDropdown() {
             const dropdown = document.getElementById('weightDropdown');
+            if (!dropdown) return;
             dropdown.innerHTML = '';
             
             weights.forEach((weight, index) => {
@@ -1660,6 +1664,42 @@ w2QjzsKE==" type="audio/wav">
             currentWeightIndex = (currentWeightIndex - 1 + weights.length) % weights.length;
             updateWeightDisplay();
             showCornerAlert(`⚖️ ${weights[currentWeightIndex]} Selected`, 'weight-alert', 2000);
+        }
+
+        // Weight List Toggle
+        function toggleWeightList() {
+            const list = document.getElementById('weightList');
+            if (list.style.display === 'block') { list.style.display = 'none'; return; }
+            // Build list items
+            list.innerHTML = '';
+            weights.forEach(function(w, idx) {
+                const item = document.createElement('div');
+                const f = formulas[w];
+                const isActive = idx === currentWeightIndex;
+                item.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.15s;' + (isActive ? 'background:#667eea;color:white;font-weight:700;' : 'color:#333;');
+                item.innerHTML = '<div style="font-size:15px;font-weight:700;">' + w + '</div>' +
+                    '<div style="font-size:11px;opacity:0.75;margin-top:2px;">' + (f ? f.pouchToShipper + ' Pouch/Shipper | ' + f.shipperToPallet + ' Shipper/Pallet' : '') + '</div>';
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    currentWeightIndex = idx;
+                    updateWeightDisplay();
+                    list.style.display = 'none';
+                    showCornerAlert('⚖️ ' + w + ' Selected', 'weight-alert', 2000);
+                });
+                item.addEventListener('mouseover', function() { if (!isActive) this.style.background = '#f5f5f5'; });
+                item.addEventListener('mouseout',  function() { if (!isActive) this.style.background = ''; });
+                list.appendChild(item);
+            });
+            list.style.display = 'block';
+            // Close on outside click
+            setTimeout(function() {
+                document.addEventListener('click', function closeList(e) {
+                    if (!list.contains(e.target)) {
+                        list.style.display = 'none';
+                        document.removeEventListener('click', closeList);
+                    }
+                });
+            }, 10);
         }
 
         // Update weight display and recalculate
@@ -2143,7 +2183,7 @@ w2QjzsKE==" type="audio/wav">
             
             document.getElementById('currentWeight').textContent = currentWeight;
             document.getElementById('formulaWeight').textContent = currentWeight;
-            document.getElementById('weightDropdown').value = currentWeightIndex;
+            if(document.getElementById('weightDropdown')) document.getElementById('weightDropdown').value = currentWeightIndex;
             
             // Update label based on unit
             const pouchLabel = document.querySelector('label[for="pouchCount"]');
