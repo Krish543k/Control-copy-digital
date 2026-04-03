@@ -123,13 +123,11 @@ header {
 }
 
 .dark-mode-toggle {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
     cursor: pointer;
     font-size: 24px;
     transition: transform 0.3s;
+    flex-shrink: 0;
 }
 
 .dark-mode-toggle:hover {
@@ -1235,7 +1233,6 @@ body.dark-mode .corner {
     }
     .dark-mode-toggle {
         font-size: 20px;
-        right: 10px;
     }
 }
 
@@ -1312,6 +1309,8 @@ body.dark-mode .corner {
                 <div class="lock-icon" style="margin-bottom:0;">🔒</div>
                 <div id="locationDot" style="position:absolute;top:0;right:-4px;width:12px;height:12px;border-radius:50%;background:#ccc;box-shadow:0 0 6px rgba(0,0,0,0.3);transition:background 0.5s;border:2px solid white;" title="Location Status"></div>
             </div>
+            <!-- Guide ? button — left side -->
+            <div onclick="openUserGuide()" style="position:absolute;top:12px;left:15px;width:26px;height:26px;background:rgba(102,126,234,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;color:#667eea;border:1.5px solid #667eea;" title="User Guide">?</div>
             <!-- Calculator button — top right -->
             <button onclick="openCalculator()" style="position:absolute;top:12px;right:15px;width:36px;height:36px;background:rgba(102,126,234,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid #667eea;padding:0;-webkit-tap-highlight-color:transparent;" title="Calculator">
                 <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -1331,8 +1330,6 @@ body.dark-mode .corner {
                     <text x="72" y="82" font-size="14" font-weight="bold" fill="#ff0000" text-anchor="middle">Lite</text>
                 </svg>
             </button>
-            <!-- Guide ? button — left side -->
-            <div onclick="openUserGuide()" style="position:absolute;top:12px;left:15px;width:26px;height:26px;background:rgba(102,126,234,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;color:#667eea;border:1.5px solid #667eea;" title="User Guide">?</div>
             <h2>Digital Control Copy</h2>
             <p>Enter password to access</p>
             <div id="gpsWarning" style="display:none;color:#f44336;font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;"></div>
@@ -1365,9 +1362,10 @@ body.dark-mode .corner {
                 <div class="dot"></div>
             </div>
             <h1>Digital Control Copy</h1>
-            <button onclick="openCalculator()" title="Calculator" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);cursor:pointer;font-size:20px;width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0;color:white;">⇄</button>
+            <button onclick="openCalculator()" title="Calculator" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);cursor:pointer;font-size:18px;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;color:white;flex-shrink:0;margin-left:10px;">⇄</button>
             <div style="flex:1;"></div>
-            <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <button onclick="logoutApp()" title="Lock Screen" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);cursor:pointer;font-size:16px;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;color:white;flex-shrink:0;">🔒</button>
+            <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode" style="margin-left:8px;">
                 <span id="darkModeIcon">🌙</span>
             </div>
         </div>
@@ -1826,8 +1824,10 @@ function addManualData() {
         secUsl: document.getElementById('secUsl').value.trim(),
         secTera: document.getElementById('secTera').value.trim(),
         status: "OK",
-        addedOn: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}),
-        addedBy: uploaderName.trim()
+        addedOn: isEditMode ? (stored[pcode]?.addedOn || new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})) : new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}),
+        addedBy: isEditMode ? (stored[pcode]?.addedBy || uploaderName.trim()) : uploaderName.trim(),
+        editedOn: isEditMode ? new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : undefined,
+        editedBy: isEditMode ? uploaderName.trim() : undefined
     };
     
     try {
@@ -2109,7 +2109,7 @@ function editRecord(pcode) {
     // Pre-fill form with existing data
     setTimeout(() => {
         document.getElementById('pcode').value = item.pcode;
-        document.getElementById('pcode').readOnly = true; // Can't change PCode
+        document.getElementById('pcode').readOnly = false; // Allow PCode edit
         document.getElementById('sku').value = item.sku || '';
         document.getElementById('bulkGCase').value = item.bulkGCase || '';
         document.getElementById('mrpOld').value = item.mrpOld || '';
@@ -3522,26 +3522,7 @@ function downloadAPK() {
 
 // ===== CALCULATOR =====
 function openCalculator() {
-    const existing = document.getElementById('calcModal');
-    if (existing) { existing.remove(); document.body.style.overflow = ''; return; }
-    const modal = document.createElement('div');
-    modal.id = 'calcModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:99999;display:flex;flex-direction:column;overflow:hidden;';
-    const header = document.createElement('div');
-    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#667eea;color:white;flex-shrink:0;min-height:50px;';
-    header.innerHTML = '<span style="font-size:16px;font-weight:700;color:white;">🏭 Production Calculator</span><button onclick="document.getElementById(\'calcModal\').remove();document.body.style.overflow=\'\';" style="background:rgba(255,255,255,0.25);border:none;font-size:24px;cursor:pointer;color:white;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">&times;</button>';
-    const iframe = document.createElement('iframe');
-    iframe.src = 'calculator.html';
-    iframe.style.cssText = 'border:none;width:100%;display:block;background:white;';
-    iframe.setAttribute('allowfullscreen', '');
-    modal.appendChild(header);
-    modal.appendChild(iframe);
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-    function resize() { iframe.style.height = (window.innerHeight - header.offsetHeight) + 'px'; }
-    resize();
-    window.addEventListener('resize', resize);
-    window.addEventListener('orientationchange', resize);
+    window.location.href = 'calculator.html';
 }
 
 function openCalculatorSettings() {
