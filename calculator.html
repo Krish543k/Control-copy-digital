@@ -2127,6 +2127,28 @@ w2QjzsKE==" type="audio/wav">
 
         // Load dark mode preference
         window.onload = function() {
+            // First sync customFormulas from server, then load
+            const binId = localStorage.getItem('jb_bin_id') || localStorage.getItem('jb_public_bin_id') || '';
+            const apiKey = localStorage.getItem('jb_api_key') || '';
+            if (binId) {
+                const headers = { 'X-Bin-Meta': 'false' };
+                if (apiKey) headers['X-Access-Key'] = apiKey;
+                fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', { headers })
+                    .then(r => r.json())
+                    .then(json => {
+                        const rec = json.record || json || {};
+                        if (rec.customFormulas) {
+                            localStorage.setItem('customFormulas', JSON.stringify(rec.customFormulas));
+                        }
+                    })
+                    .catch(() => {})
+                    .finally(() => { initCalcFormulas(); });
+            } else {
+                initCalcFormulas();
+            }
+        };
+
+        function initCalcFormulas() {
             // Load formulas from localStorage
             const savedFormulas = localStorage.getItem('customFormulas');
             const savedWeights = localStorage.getItem('weights');
@@ -2134,14 +2156,17 @@ w2QjzsKE==" type="audio/wav">
             if (savedFormulas) {
                 try {
                     Object.assign(formulas, JSON.parse(savedFormulas));
+                    // Add any new weight names to weights array
+                    Object.keys(JSON.parse(savedFormulas)).forEach(w => {
+                        if (!weights.includes(w)) weights.push(w);
+                    });
                 } catch (e) {}
             }
             
             if (savedWeights) {
                 try {
                     const loadedWeights = JSON.parse(savedWeights);
-                    weights.length = 0;
-                    weights.push(...loadedWeights);
+                    loadedWeights.forEach(w => { if (!weights.includes(w)) weights.push(w); });
                 } catch (e) {}
             }
             
@@ -2174,11 +2199,11 @@ w2QjzsKE==" type="audio/wav">
                 soundEnabled = true;
                 soundSwitch.classList.add('active');
             }
-            
-            // Initialize formula display with current weight
-            const currentWeight = weights[currentWeightIndex];
-            const formula = getCurrentFormula();
-            const unit = formula.unit || 'Pouch';
+            // Show initial weight selection alert
+            setTimeout(() => {
+                showCornerAlert('⚖️ Select Weight First', 'weight-alert', 3000);
+            }, 1800);
+        }  const unit = formula.unit || 'Pouch';
             
             document.getElementById('currentWeight').textContent = currentWeight;
             document.getElementById('formulaWeight').textContent = currentWeight;
