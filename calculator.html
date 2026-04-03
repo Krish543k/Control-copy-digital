@@ -1516,10 +1516,10 @@ w2QjzsKE==" type="audio/wav">
 
         // Display Custom Formulas
         function displayCustomFormulas() {
+        // Display Custom Formulas
+        function displayCustomFormulas() {
             const listDiv = document.getElementById('customFormulaList');
-            listDiv.innerHTML = '<div style="color: #00ffff; font-size: 13px; font-weight: 600; margin-bottom: 10px; border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 10px;">📋 Custom Formulas:</div>';
-            
-            // Show only custom formulas (not default ones)
+            if (!listDiv) return; // element not present — skip
             const defaultWeights = ['S1 70g', '300g', '500g', '850g', '900g', '1kg', '2kg', '3kg', '3.2kg', '4kg', '5kg', '6kg'];
             
             weights.forEach((weight) => {
@@ -2166,8 +2166,10 @@ w2QjzsKE==" type="audio/wav">
             if(document.getElementById('weightDropdown')) document.getElementById('weightDropdown').value = currentWeightIndex;
             
             // Update label based on unit
-            const pouchLabel = document.querySelector('label[for="pouchCount"]');
-            if (pouchLabel) {
+            setTimeout(() => { showCornerAlert('Select Weight First', 'weight-alert', 3000); }, 1800);
+            // Update weight display after formulas loaded
+            updateWeightDisplay();
+        }   if (pouchLabel) {
                 pouchLabel.textContent = `📦 ${unit} Count`;
             }
             
