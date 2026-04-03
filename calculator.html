@@ -1210,8 +1210,8 @@
     
     <div class="container">
         <header>
-            <h1 style="flex:1;">&#127981; Production Calculator</h1>
-            <button class="calc-dcc-btn" onclick="window.location.href='vvv.html'" title="Switch to Digital Control Copy">&#8644;</button>
+            <h1 style="flex:0 1 auto;">&#127981; Production Calculator</h1>
+            <button class="calc-dcc-btn" onclick="window.location.href='lol.html'" title="Back to Digital Control Copy" style="margin-left:10px;margin-right:auto;">⇄</button>
             <div class="header-right">
                 <div class="dark-mode-toggle" onclick="refreshAll()" title="Refresh All">
                     <span id="refreshIcon">&#8635;</span>
@@ -1686,20 +1686,19 @@ w2QjzsKE==" type="audio/wav">
                     list.style.display = 'none';
                     showCornerAlert('⚖️ ' + w + ' Selected', 'weight-alert', 2000);
                 });
-                item.addEventListener('mouseover', function() { if (!isActive) this.style.background = '#f5f5f5'; });
-                item.addEventListener('mouseout',  function() { if (!isActive) this.style.background = ''; });
                 list.appendChild(item);
             });
             list.style.display = 'block';
-            // Close on outside click
+            // Close on outside click — use capture to avoid conflicts
+            function closeList(e) {
+                const selector = document.querySelector('.weight-selector');
+                if (selector && selector.contains(e.target)) return;
+                list.style.display = 'none';
+                document.removeEventListener('click', closeList, true);
+            }
             setTimeout(function() {
-                document.addEventListener('click', function closeList(e) {
-                    if (!list.contains(e.target)) {
-                        list.style.display = 'none';
-                        document.removeEventListener('click', closeList);
-                    }
-                });
-            }, 10);
+                document.addEventListener('click', closeList, true);
+            }, 50);
         }
 
         // Update weight display and recalculate
