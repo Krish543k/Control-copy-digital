@@ -21,6 +21,23 @@
             overflow-x: hidden;
         }
 
+        /* JARVIS-style animated background with multiple layers */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 150, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 200, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(100, 200, 255, 0.08) 0%, transparent 40%);
+            animation: pulse 4s ease-in-out infinite;
+            z-index: 0;
+        }
+
         @keyframes pulse {
             0%, 100% { 
                 opacity: 0.6;
@@ -205,73 +222,11 @@
         }
 
         .dark-mode-toggle:hover {
-        .header-right {
-            display: flex;
-            gap: 15px;
-            align-items: center;
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8));
         }
 
-        .calc-dcc-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1.5px solid rgba(255,255,255,0.4);
-            cursor: pointer;
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-
-        .calc-dcc-btn:hover {
-            background: rgba(255,255,255,0.35);
-        }
-
-        .calc-dcc-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1.5px solid rgba(255,255,255,0.4);
-            cursor: pointer;
-            color: white;
-            font-size: 13px;
-            font-weight: 700;
-            padding: 6px 12px;
-            border-radius: 8px;
-            -webkit-tap-highlight-color: transparent;
-            white-space: nowrap;
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-
-        .calc-dcc-btn:hover {
-            background: rgba(255,255,255,0.35);
-        }
-
-        .calc-dcc-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1.5px solid rgba(255,255,255,0.4);
-            cursor: pointer;
-            color: white;
-            font-size: 18px;
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-            flex-shrink: 0;
-            transition: background 0.2s;
-        }
-
-        .calc-dcc-btn:hover {
-            background: rgba(255,255,255,0.35);
-        }dark-mode-toggle:active {
+        .dark-mode-toggle:active {
             transform: scale(1.1);
         }
 
@@ -1233,7 +1188,7 @@
                 <h3>⚙️ STEP 5: Custom Formula (Optional)</h3>
                 <p>1. Settings (⚙️) mein jao</p>
                 <p>2. "Manual Formula" toggle ON karo</p>
-            <button class="calc-dcc-btn" onclick="window.location.href='vvv.html'" title="Digital Control Copy">⇄</button>
+                <p>3. Form fill karo aur Save karo</p>
                 <p>4. Saved formulas list mein dikhenge</p>
             </div>
 
@@ -1271,18 +1226,17 @@
             <div class="range-box lowest">
                 <span class="range-label">📉 Lowest 10%</span>
                 <span class="range-value" id="shipperLowest">0</span>
-        <header>
-            <h1>🏭 Production Calculator</h1>
-            <div class="header-right">
-                <button onclick="window.location.href='vvv.html'" title="Digital Control Copy" style="background:rgba(255,255,255,0.2);border:none;cursor:pointer;color:white;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;-webkit-tap-highlight-color:transparent;white-space:nowrap;">📋 DCC</button>
-                <div class="dark-mode-toggle" onclick="refreshAll()" title="Refresh All">
-                    <span id="refreshIcon">↻</span>
-                </div>
-                <div class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Mode">
-                    <span id="darkModeIcon">☀️</span>
-                </div>
             </div>
-        </header>   <span class="weight-arrow" onclick="nextWeight()">▶</span>
+            
+            <!-- Weight Selector in Middle -->
+            <div class="weight-selector">
+                <span class="weight-label">⚖️ WEIGHT</span>
+                <div class="weight-controls">
+                    <span class="weight-arrow" onclick="previousWeight()">◀</span>
+                    <div class="weight-value">
+                        <span id="currentWeight">1kg</span>
+                    </div>
+                    <span class="weight-arrow" onclick="nextWeight()">▶</span>
                 </div>
             </div>
             
@@ -1516,10 +1470,10 @@ w2QjzsKE==" type="audio/wav">
                 pouchToPallet: pouchToPallet,
                 speed: speed,
                 unit: unitName
-        // Display Custom Formulas
-        function displayCustomFormulas() {
-            const listDiv = document.getElementById('customFormulaList');
-            if (!listDiv) return; // element not present — skip
+            };
+            
+            // Add to weights array if not exists
+            if (!weights.includes(weightName)) {
                 weights.push(weightName);
             }
             
@@ -2246,4 +2200,3 @@ w2QjzsKE==" type="audio/wav">
     </script>
 </body>
 </html>
-
