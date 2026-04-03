@@ -1414,13 +1414,11 @@ w2QjzsKE==" type="audio/wav">
 
         function toggleSound() {
             const soundSwitch = document.getElementById('soundSwitch');
-            soundSwitch.classList.toggle('active');
-            
-            soundEnabled = soundSwitch.classList.contains('active');
-            
+            if (soundSwitch) soundSwitch.classList.toggle('active');
+            soundEnabled = soundSwitch ? soundSwitch.classList.contains('active') : !soundEnabled;
             if (soundEnabled) {
                 localStorage.setItem('soundEnabled', 'enabled');
-                playWeightSound(); // Play sound to confirm it's ON
+                playWeightSound();
             } else {
                 localStorage.setItem('soundEnabled', 'disabled');
             }
@@ -1818,7 +1816,7 @@ w2QjzsKE==" type="audio/wav">
                     document.getElementById('extraShipper').textContent = `+ 0 Shipper`;
                     updateResults(0, 0, 0);ateResults(0, 0, 0);
                     updateShipperRange(0);
-                    return;
+                    updateResults(0, 0, 0);
                 }
                 
                 const pouchCount = parseFloat(pouchInput) || 0;
@@ -2077,14 +2075,14 @@ w2QjzsKE==" type="audio/wav">
             body.classList.toggle('dark-mode');
             
             if (body.classList.contains('dark-mode')) {
-                icon.textContent = '☀️';
-                themeLabel.textContent = 'Dark Mode';
-                themeSwitch.classList.add('active');
+                if (icon) icon.textContent = '☀️';
+                if (themeLabel) themeLabel.textContent = 'Dark Mode';
+                if (themeSwitch) themeSwitch.classList.add('active');
                 localStorage.setItem('calculatorDarkMode', 'enabled');
             } else {
-                icon.textContent = '🌙';
-                themeLabel.textContent = 'Light Mode';
-                themeSwitch.classList.remove('active');
+                if (icon) icon.textContent = '🌙';
+                if (themeLabel) themeLabel.textContent = 'Light Mode';
+                if (themeSwitch) themeSwitch.classList.remove('active');
                 localStorage.setItem('calculatorDarkMode', 'disabled');
             }
         }
@@ -2146,31 +2144,6 @@ w2QjzsKE==" type="audio/wav">
             } else {
                 initCalcFormulas();
             }
-        };
-
-        function initCalcFormulas() {
-            // Load formulas from localStorage
-            const savedFormulas = localStorage.getItem('customFormulas');
-            const savedWeights = localStorage.getItem('weights');
-            
-            if (savedFormulas) {
-                try {
-                    Object.assign(formulas, JSON.parse(savedFormulas));
-                    // Add any new weight names to weights array
-                    Object.keys(JSON.parse(savedFormulas)).forEach(w => {
-                        if (!weights.includes(w)) weights.push(w);
-                    });
-                } catch (e) {}
-            }
-            
-            if (savedWeights) {
-                try {
-                    const loadedWeights = JSON.parse(savedWeights);
-                    loadedWeights.forEach(w => { if (!weights.includes(w)) weights.push(w); });
-                } catch (e) {}
-            }
-            
-            const darkMode = localStorage.getItem('calculatorDarkMode');
             const body = document.body;
             const icon = document.getElementById('darkModeIcon');
             const themeSwitch = document.getElementById('themeSwitch');
@@ -2178,32 +2151,15 @@ w2QjzsKE==" type="audio/wav">
             
             if (darkMode === 'enabled' || darkMode === null) {
                 body.classList.add('dark-mode');
-                icon.textContent = '☀️';
-                themeLabel.textContent = 'Dark Mode';
-                themeSwitch.classList.add('active');
+                if (icon) icon.textContent = '☀️';
+                if (themeLabel) themeLabel.textContent = 'Dark Mode';
+                if (themeSwitch) themeSwitch.classList.add('active');
             } else {
                 body.classList.remove('dark-mode');
-                icon.textContent = '🌙';
-                themeLabel.textContent = 'Light Mode';
-                themeSwitch.classList.remove('active');
+                if (icon) icon.textContent = '🌙';
+                if (themeLabel) themeLabel.textContent = 'Light Mode';
+                if (themeSwitch) themeSwitch.classList.remove('active');
             }
-            
-            // Load sound preference
-            const soundPref = localStorage.getItem('soundEnabled');
-            const soundSwitch = document.getElementById('soundSwitch');
-            
-            if (soundPref === 'disabled') {
-                soundEnabled = false;
-                soundSwitch.classList.remove('active');
-            } else {
-                soundEnabled = true;
-                soundSwitch.classList.add('active');
-            }
-            // Show initial weight selection alert
-            setTimeout(() => {
-                showCornerAlert('⚖️ Select Weight First', 'weight-alert', 3000);
-            }, 1800);
-        }  const unit = formula.unit || 'Pouch';
             
             document.getElementById('currentWeight').textContent = currentWeight;
             document.getElementById('formulaWeight').textContent = currentWeight;
