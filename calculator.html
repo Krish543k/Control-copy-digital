@@ -2291,7 +2291,7 @@ w2QjzsKE==" type="audio/wav">
                     .then(r => r.json())
                     .then(json => {
                         const rec = json.record || json || {};
-                        if (rec.customFormulas) {
+                        if (rec.customFormulas && Object.keys(rec.customFormulas).length > 0) {
                             localStorage.setItem('customFormulas', JSON.stringify(rec.customFormulas));
                         }
                     })
@@ -2351,37 +2351,6 @@ w2QjzsKE==" type="audio/wav">
             }, 1800);
         }
 
-        // Load Custom Formulas from localStorage on page load
-        (function loadCustomFormulas() {
-            try {
-                const savedFormulas = localStorage.getItem('customFormulas');
-                const savedWeights = localStorage.getItem('weights');
-                
-                if (savedFormulas) {
-                    const customFormulasData = JSON.parse(savedFormulas);
-                    // Merge with existing formulas
-                    Object.assign(formulas, customFormulasData);
-                }
-                
-                if (savedWeights) {
-                    const savedWeightsArray = JSON.parse(savedWeights);
-                    // Add custom weights to weights array
-                    savedWeightsArray.forEach(weight => {
-                        if (!weights.includes(weight)) {
-                            weights.push(weight);
-                        }
-                    });
-                }
-                
-                // Update dropdown with all weights
-                updateWeightDropdown();
-                
-                // Display custom formulas if any
-                displayCustomFormulas();
-            } catch (e) {
-                console.log('No custom formulas to load');
-            }
-        })();
     </script>
 </body>
 </html>
