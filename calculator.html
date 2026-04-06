@@ -196,17 +196,37 @@
         header {
             background: #667eea;
             color: white;
-            padding: 12px 18px;
+            padding: 10px 12px;
             border-radius: 8px 8px 0 0;
             margin: -20px -20px 20px -20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
+            flex-wrap: nowrap;
+            gap: 6px;
         .header-right {
             display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .calc-dcc-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1.5px solid rgba(255,255,255,0.4);
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+        }   display: flex;
             gap: 15px;
             align-items: center;
         }
@@ -484,9 +504,12 @@
 
         h1 {
             color: white;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
             margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .range-boxes {
@@ -1516,10 +1539,10 @@ w2QjzsKE==" type="audio/wav">
 
         // Display Custom Formulas
         function displayCustomFormulas() {
-        // Display Custom Formulas
-        function displayCustomFormulas() {
             const listDiv = document.getElementById('customFormulaList');
-            if (!listDiv) return; // element not present — skip
+            listDiv.innerHTML = '<div style="color: #00ffff; font-size: 13px; font-weight: 600; margin-bottom: 10px; border-top: 1px solid rgba(0, 255, 255, 0.3); padding-top: 10px;">📋 Custom Formulas:</div>';
+            
+            // Show only custom formulas (not default ones)
             const defaultWeights = ['S1 70g', '300g', '500g', '850g', '900g', '1kg', '2kg', '3kg', '3.2kg', '4kg', '5kg', '6kg'];
             
             weights.forEach((weight) => {
@@ -1687,15 +1710,14 @@ w2QjzsKE==" type="audio/wav">
                 list.appendChild(item);
             });
             list.style.display = 'block';
-            // Close on outside click — use capture to avoid conflicts
-            function closeList(e) {
-                const selector = document.querySelector('.weight-selector');
-                if (selector && selector.contains(e.target)) return;
-                list.style.display = 'none';
-                document.removeEventListener('click', closeList, true);
-            }
+            // Close on outside click
             setTimeout(function() {
-                document.addEventListener('click', closeList, true);
+                document.addEventListener('click', function closeList(e) {
+                    const selector = document.querySelector('.weight-selector');
+                    if (selector && selector.contains(e.target)) return;
+                    list.style.display = 'none';
+                    document.removeEventListener('click', closeList, true);
+                }, true);
             }, 50);
         }
 
@@ -2091,9 +2113,304 @@ w2QjzsKE==" type="audio/wav">
         function refreshAll() {
             // Clear all input fields
             document.getElementById('pouchCount').value = '';
-            document.getElementById('shipperCount').value = '';
-            document.getElementById('palletCount').value = '';
-            document.getElementById('targetShipper').value = '';
+        function toggleDarkMode() {('palletCount').value = '';
+        // Calc Side Menu
+        function toggleCalcMenu() {
+            const menu = document.getElementById('calcSideMenu');
+            const overlay = document.getElementById('calcMenuOverlay');
+            const isOpen = menu.style.left === '0px';
+            menu.style.left = isOpen ? '-270px' : '0px';
+            overlay.style.display = isOpen ? 'none' : 'block';
+        }
+
+        // Open Calculator Settings (formula management)
+        function openCalcSettings() {
+            const existing = document.getElementById('calcSettingsModal');
+            if (existing) existing.remove();
+
+            const custom = JSON.parse(localStorage.getItem('customFormulas') || '{}');
+            const defaultF = {
+                'S1 70g':{pouchToShipper:2,shipperToPallet:48,speed:3,unit:'met'},
+                '300g':{pouchToShipper:24,shipperToPallet:42,speed:40,unit:'Pouch'},
+                '500g':{pouchToShipper:24,shipperToPallet:36,speed:40,unit:'Pouch'},
+                '850g':{pouchToShipper:12,shipperToPallet:50,speed:40,unit:'Pouch'},
+                '900g':{pouchToShipper:12,shipperToPallet:50,speed:40,unit:'Pouch'},
+                '1kg':{pouchToShipper:12,shipperToPallet:50,speed:40,unit:'Pouch'},
+                '2kg':{pouchToShipper:6,shipperToPallet:40,speed:30,unit:'Pouch'},
+                '3kg':{pouchToShipper:4,shipperToPallet:40,speed:25,unit:'Pouch'},
+                '3.2kg':{pouchToShipper:4,shipperToPallet:40,speed:25,unit:'Pouch'},
+                '4kg':{pouchToShipper:4,shipperToPallet:32,speed:21,unit:'Pouch'},
+                '5kg':{pouchToShipper:2,shipperToPallet:60,speed:10,unit:'Pouch'},
+                '6kg':{pouchToShipper:2,shipperToPallet:45,speed:8,unit:'Pouch'}
+            };
+            const allF = Object.assign({}, defaultF, custom);
+            const weightOpts = Object.keys(allF).map(k=>`<option value="${k}">${k}</option>`).join('');
+            showCornerAlert('All Cleared', 'weight-alert', 2000);
+        }
+
+        // Calc Side Menu toggle
+        function toggleCalcMenu() {
+            const menu = document.getElementById('calcSideMenu');
+            const overlay = document.getElementById('calcMenuOverlay');
+            const isOpen = menu.style.left === '0px';
+            menu.style.left = isOpen ? '-270px' : '0px';
+            overlay.style.display = isOpen ? 'none' : 'block';
+        }
+
+        // Open Calculator Formula Settings
+        function openCalcSettings() {
+            const existing = document.getElementById('calcSettingsModal');
+            if (existing) existing.remove();
+            const custom = JSON.parse(localStorage.getItem('customFormulas') || '{}');
+            const allF = Object.assign({}, formulas, custom);
+            const weightOpts = Object.keys(allF).map(k => '<option value="'+k+'">'+k+'</option>').join('');
+            const rows = Object.keys(allF).map(k => {
+                const f = allF[k], isC = !!custom[k];
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:'+(isC?'#e8f5e9':'#f5f5f5')+';border-radius:6px;margin-bottom:5px;font-size:12px;">'
+                    + '<span><strong>'+k+'</strong> | '+f.pouchToShipper+' P/S | '+f.shipperToPallet+' S/P | '+f.speed+' '+f.unit+'/min</span>'
+                    + (isC ? '<button onclick="deleteCalcF(\''+k+'\')" style="background:#f44336;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;">X</button>' : '')
+                    + '</div>';
+            }).join('');
+
+            const modal = document.createElement('div');
+            modal.id = 'calcSettingsModal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:99999;padding:15px;box-sizing:border-box;overflow-y:auto;';
+            modal.innerHTML = '<div style="background:white;border-radius:12px;max-width:480px;width:100%;margin:auto;overflow:hidden;">'
+                + '<div style="background:#667eea;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">'
+                + '<span style="color:white;font-weight:700;font-size:16px;">Formula Settings</span>'
+                + '<button onclick="document.getElementById(\'calcSettingsModal\').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:30px;height:30px;border-radius:50%;cursor:pointer;">X</button>'
+                + '</div><div style="padding:15px;">'
+                + '<div style="background:#fff3e0;border:1.5px solid #ff9800;border-radius:8px;padding:12px;margin-bottom:12px;">'
+                + '<h3 style="margin:0 0 10px;color:#e65100;font-size:14px;">Edit Existing Formula</h3>'
+                + '<select id="csEditSel" onchange="csLoadEdit()" style="width:100%;padding:9px;border:2px solid #ff9800;border-radius:7px;font-size:14px;margin-bottom:10px;"><option value="">-- Select Weight --</option>'+weightOpts+'</select>'
+                + '<div id="csEditFields" style="display:none;">'
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+                + '<div><label style="font-size:11px;font-weight:600;">Pouch/Shipper</label><input id="csEPS" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;" oninput="csUpdatePreview()"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Shipper/Pallet</label><input id="csESP" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;" oninput="csUpdatePreview()"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Speed/min</label><input id="csESpd" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Unit</label><select id="csEUnit" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"><option value="Pouch">Pouch</option><option value="met">met</option></select></div>'
+                + '</div><div id="csPreview" style="background:#f9f9f9;border-radius:6px;padding:8px;font-size:12px;color:#555;margin-bottom:8px;"></div>'
+                + '<button onclick="csSaveEdit()" style="width:100%;padding:10px;background:#ff9800;color:white;border:none;border-radius:7px;font-size:14px;cursor:pointer;font-weight:700;">Save Changes</button>'
+                + '</div></div>'
+                + '<div style="background:#e8f5e9;border:1.5px solid #4caf50;border-radius:8px;padding:12px;margin-bottom:12px;">'
+                + '<h3 style="margin:0 0 10px;color:#2e7d32;font-size:14px;">Add New Formula</h3>'
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+                + '<div style="grid-column:1/-1;"><label style="font-size:11px;font-weight:600;">Weight Name</label><input id="csNName" placeholder="e.g. 1.5kg" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Pouch/Shipper</label><input id="csNPS" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Shipper/Pallet</label><input id="csNSP" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Speed/min</label><input id="csNSpd" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>'
+                + '<div><label style="font-size:11px;font-weight:600;">Unit</label><select id="csNUnit" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"><option value="Pouch">Pouch</option><option value="met">met</option></select></div>'
+                + '</div><button onclick="csSaveNew()" style="width:100%;padding:10px;background:#4caf50;color:white;border:none;border-radius:7px;font-size:14px;cursor:pointer;font-weight:700;">Add Formula</button>'
+                + '</div>'
+                + '<div><h3 style="font-size:13px;color:#333;margin-bottom:8px;">All Formulas</h3><div style="max-height:160px;overflow-y:auto;">'+rows+'</div></div>'
+                + '</div></div>';
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+        }
+
+        function csLoadEdit() {
+            const key = document.getElementById('csEditSel').value;
+            const fields = document.getElementById('csEditFields');
+            if (!key) { fields.style.display='none'; return; }
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            const f = custom[key] || formulas[key];
+            if (!f) return;
+            document.getElementById('csEPS').value = f.pouchToShipper;
+            document.getElementById('csESP').value = f.shipperToPallet;
+            document.getElementById('csESpd').value = f.speed;
+            document.getElementById('csEUnit').value = f.unit||'Pouch';
+            fields.style.display = 'block';
+            csUpdatePreview();
+        }
+
+        function csUpdatePreview() {
+            const key = document.getElementById('csEditSel').value;
+            const ps = document.getElementById('csEPS').value;
+            const sp = document.getElementById('csESP').value;
+            const spd = document.getElementById('csESpd').value;
+            const unit = document.getElementById('csEUnit').value;
+            if (!ps||!sp) return;
+            document.getElementById('csPreview').textContent = key+': '+ps+' '+unit+'/Shipper | '+sp+' Shipper/Pallet | Speed: '+spd+' '+unit+'/min';
+        }
+
+        function csSaveEdit() {
+            const key = document.getElementById('csEditSel').value;
+            if (!key) { alert('Select a weight!'); return; }
+            const ps=parseInt(document.getElementById('csEPS').value);
+            const sp=parseInt(document.getElementById('csESP').value);
+            const spd=parseFloat(document.getElementById('csESpd').value)||0;
+            const unit=document.getElementById('csEUnit').value;
+            if (!ps||!sp) { alert('Pouch/Shipper and Shipper/Pallet required!'); return; }
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            custom[key] = {pouchToShipper:ps,shipperToPallet:sp,pouchToPallet:ps*sp,speed:spd,unit};
+            localStorage.setItem('customFormulas', JSON.stringify(custom));
+            Object.assign(formulas, custom);
+            if (!weights.includes(key)) weights.push(key);
+            showCornerAlert('Saved: '+key, 'weight-alert', 2000);
+            document.getElementById('calcSettingsModal').remove();
+            openCalcSettings();
+        }
+
+        function csSaveNew() {
+            const name=document.getElementById('csNName').value.trim();
+            const ps=parseInt(document.getElementById('csNPS').value);
+            const sp=parseInt(document.getElementById('csNSP').value);
+            const spd=parseFloat(document.getElementById('csNSpd').value)||0;
+            const unit=document.getElementById('csNUnit').value;
+            if (!name) { alert('Weight name required!'); return; }
+            if (!ps||!sp) { alert('Pouch/Shipper and Shipper/Pallet required!'); return; }
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            custom[name] = {pouchToShipper:ps,shipperToPallet:sp,pouchToPallet:ps*sp,speed:spd,unit};
+            localStorage.setItem('customFormulas', JSON.stringify(custom));
+            formulas[name] = custom[name];
+            if (!weights.includes(name)) weights.push(name);
+            showCornerAlert('Added: '+name, 'weight-alert', 2000);
+            document.getElementById('calcSettingsModal').remove();
+            openCalcSettings();
+        }
+
+        function deleteCalcF(name) {
+            if (!confirm('Delete "'+name+'" formula?')) return;
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            delete custom[name];
+            localStorage.setItem('customFormulas', JSON.stringify(custom));
+            delete formulas[name];
+            const idx = weights.indexOf(name);
+            if (idx > -1) weights.splice(idx, 1);
+            document.getElementById('calcSettingsModal').remove();
+            openCalcSettings();
+        }       const f=allF[k], isC=!!custom[k];
+                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:${isC?'#e8f5e9':'#f5f5f5'};border-radius:6px;margin-bottom:5px;font-size:12px;">
+                    <span><strong>${k}</strong> | ${f.pouchToShipper} P/S | ${f.shipperToPallet} S/P | ${f.speed} ${f.unit}/min</span>
+                    ${isC?`<button onclick="deleteCalcF('${k}')" style="background:#f44336;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;">✕</button>`:''}
+                </div>`;
+            }join('');
+
+            const modal = document.createElement('div');
+            modal.id = 'calcSettingsModal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:99999;padding:15px;box-sizing:border-box;overflow-y:auto;';
+            modal.innerHTML = `
+            <div style="background:white;border-radius:12px;padding:0;max-width:480px;width:100%;margin:auto;overflow:hidden;">
+                <div style="background:#667eea;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="color:white;font-weight:700;font-size:16px;">📐 Formula Settings</span>
+                    <button onclick="document.getElementById('calcSettingsModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:30px;height:30px;border-radius:50%;cursor:pointer;">&#215;</button>
+                </div>
+                <div style="padding:15px;">
+                    <!-- Edit existing -->
+                    <div style="background:#fff3e0;border:1.5px solid #ff9800;border-radius:8px;padding:12px;margin-bottom:12px;">
+                        <h3 style="margin:0 0 10px;color:#e65100;font-size:14px;">✏️ Edit Existing Formula</h3>
+                        <select id="csEditSel" onchange="csLoadEdit()" style="width:100%;padding:9px;border:2px solid #ff9800;border-radius:7px;font-size:14px;margin-bottom:10px;">
+                            <option value="">-- Select Weight --</option>${weightOpts}
+                        </select>
+                        <div id="csEditFields" style="display:none;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                                <div><label style="font-size:11px;font-weight:600;color:#555;">Pouch/Shipper</label><input id="csEPS" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;" oninput="csUpdatePreview()"></div>
+                                <div><label style="font-size:11px;font-weight:600;color:#555;">Shipper/Pallet</label><input id="csESP" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;" oninput="csUpdatePreview()"></div>
+                                <div><label style="font-size:11px;font-weight:600;color:#555;">Speed/min</label><input id="csESpd" type="number" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>
+                                <div><label style="font-size:11px;font-weight:600;color:#555;">Unit</label><select id="csEUnit" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"><option value="Pouch">Pouch</option><option value="met">met</option></select></div>
+                            </div>
+                            <div id="csPreview" style="background:#f9f9f9;border-radius:6px;padding:8px;font-size:12px;color:#555;margin-bottom:8px;"></div>
+                            <button onclick="csSaveEdit()" style="width:100%;padding:10px;background:#ff9800;color:white;border:none;border-radius:7px;font-size:14px;cursor:pointer;font-weight:700;">💾 Save Changes</button>
+                        </div>
+                    </div>
+                    <!-- Add new -->
+                    <div style="background:#e8f5e9;border:1.5px solid #4caf50;border-radius:8px;padding:12px;margin-bottom:12px;">
+                        <h3 style="margin:0 0 10px;color:#2e7d32;font-size:14px;">➕ Add New Formula</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                            <div style="grid-column:1/-1;"><label style="font-size:11px;font-weight:600;color:#555;">Weight Name</label><input id="csNName" placeholder="e.g. 1.5kg" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>
+                            <div><label style="font-size:11px;font-weight:600;color:#555;">Pouch/Shipper</label><input id="csNPS" type="number" placeholder="e.g. 12" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>
+                            <div><label style="font-size:11px;font-weight:600;color:#555;">Shipper/Pallet</label><input id="csNSP" type="number" placeholder="e.g. 50" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>
+                            <div><label style="font-size:11px;font-weight:600;color:#555;">Speed/min</label><input id="csNSpd" type="number" placeholder="e.g. 15" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"></div>
+                            <div><label style="font-size:11px;font-weight:600;color:#555;">Unit</label><select id="csNUnit" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;"><option value="Pouch">Pouch</option><option value="met">met</option></select></div>
+                        </div>
+                        <button onclick="csSaveNew()" style="width:100%;padding:10px;background:#4caf50;color:white;border:none;border-radius:7px;font-size:14px;cursor:pointer;font-weight:700;">➕ Add Formula</button>
+                    </div>
+                    <!-- All formulas -->
+                    <div>
+                        <h3 style="font-size:13px;color:#333;margin-bottom:8px;">📋 All Formulas <span style="font-size:11px;color:#999;">(green = custom)</span></h3>
+                        <div style="max-height:160px;overflow-y:auto;">${rows}</div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+        }
+
+        function csLoadEdit() {
+            const key = document.getElementById('csEditSel').value;
+            const fields = document.getElementById('csEditFields');
+            if (!key) { fields.style.display='none'; return; }
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            const f = custom[key] || formulas[key];
+            if (!f) return;
+            document.getElementById('csEPS').value = f.pouchToShipper;
+            document.getElementById('csESP').value = f.shipperToPallet;
+            document.getElementById('csESpd').value = f.speed;
+            document.getElementById('csEUnit').value = f.unit||'Pouch';
+            fields.style.display = 'block';
+            csUpdatePreview();
+        }
+
+        function csUpdatePreview() {
+            const key = document.getElementById('csEditSel').value;
+            const ps = document.getElementById('csEPS').value;
+            const sp = document.getElementById('csESP').value;
+            const spd = document.getElementById('csESpd').value;
+            const unit = document.getElementById('csEUnit').value;
+            if (!ps||!sp) return;
+            document.getElementById('csPreview').textContent = key+': '+ps+' '+unit+'/Shipper | '+sp+' Shipper/Pallet | Speed: '+spd+' '+unit+'/min';
+        }
+
+        function csSaveEdit() {
+            const key = document.getElementById('csEditSel').value;
+            if (!key) { alert('Select a weight!'); return; }
+            const ps=parseInt(document.getElementById('csEPS').value);
+            const sp=parseInt(document.getElementById('csESP').value);
+            const spd=parseFloat(document.getElementById('csESpd').value)||0;
+            const unit=document.getElementById('csEUnit').value;
+            if (!ps||!sp) { alert('Pouch/Shipper and Shipper/Pallet required!'); return; }
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            custom[key] = {pouchToShipper:ps,shipperToPallet:sp,pouchToPallet:ps*sp,speed:spd,unit};
+            localStorage.setItem('customFormulas', JSON.stringify(custom));
+            Object.assign(formulas, custom);
+            if (!weights.includes(key)) weights.push(key);
+            showCornerAlert('Saved: '+key, 'weight-alert', 2000);
+            document.getElementById('calcSettingsModal').remove();
+            openCalcSettings();
+        }
+
+        function csSaveNew() {
+            const name=document.getElementById('csNName').value.trim();
+            const ps=parseInt(document.getElementById('csNPS').value);
+            const sp=parseInt(document.getElementById('csNSP').value);
+            const spd=parseFloat(document.getElementById('csNSpd').value)||0;
+            const unit=document.getElementById('csNUnit').value;
+            if (!name) { alert('Weight name required!'); return; }
+            if (!ps||!sp) { alert('Pouch/Shipper and Shipper/Pallet required!'); return; }
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            custom[name] = {pouchToShipper:ps,shipperToPallet:sp,pouchToPallet:ps*sp,speed:spd,unit};
+            localStorage.setItem('customFormulas', JSON.stringify(custom));
+            formulas[name] = custom[name];
+            if (!weights.includes(name)) weights.push(name);
+            showCornerAlert('Added: '+name, 'weight-alert', 2000);
+            document.getElementById('calcSettingsModal').remove();
+            openCalcSettings();
+        }
+
+        function deleteCalcF(name) {
+            if (!confirm('Delete "'+name+'" formula?')) return;
+            const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
+            delete custom[name];
+            localStorage.setItem('customFormulas', JSON.stringify(custom));
+            delete formulas[name];
+            const idx = weights.indexOf(name);
+            if (idx > -1) weights.splice(idx, 1);
+            document.getElementById('calcSettingsModal').remove();
+            openCalcSettings();
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {('targetShipper').value = '';
             
             // Reset extra boxes
             const formula = getCurrentFormula();
@@ -2166,10 +2483,8 @@ w2QjzsKE==" type="audio/wav">
             if(document.getElementById('weightDropdown')) document.getElementById('weightDropdown').value = currentWeightIndex;
             
             // Update label based on unit
-            setTimeout(() => { showCornerAlert('Select Weight First', 'weight-alert', 3000); }, 1800);
-            // Update weight display after formulas loaded
-            updateWeightDisplay();
-        }   if (pouchLabel) {
+            const pouchLabel = document.querySelector('label[for="pouchCount"]');
+            if (pouchLabel) {
                 pouchLabel.textContent = `📦 ${unit} Count`;
             }
             
