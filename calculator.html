@@ -2291,8 +2291,17 @@ w2QjzsKE==" type="audio/wav">
                     .then(r => r.json())
                     .then(json => {
                         const rec = json.record || json || {};
-                        if (rec.customFormulas && Object.keys(rec.customFormulas).length > 0) {
+                        // Save customFormulas to localStorage
+                        if (rec.customFormulas) {
                             localStorage.setItem('customFormulas', JSON.stringify(rec.customFormulas));
+                        }
+                        // Save records to localStorage
+                        if (rec.records) {
+                            localStorage.setItem('mc_data_v1', JSON.stringify(rec.records));
+                        }
+                        // Save view password
+                        if (rec.viewPassword) {
+                            localStorage.setItem('view_password', rec.viewPassword);
                         }
                     })
                     .catch(() => {})
