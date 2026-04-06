@@ -3677,11 +3677,7 @@ function saveEditedFormula() {
     const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
     custom[key] = { pouchToShipper:ps, shipperToPallet:sp, pouchToPallet:ps*sp, speed:spd, unit };
     localStorage.setItem('customFormulas', JSON.stringify(custom));
-    const pwd = prompt('Enter admin password to save to server:');
-    const adminPwd = localStorage.getItem('admin_password')||'1234';
-    if (pwd===adminPwd) {
-        syncToServer().then(()=>showSyncToast('✅ "'+key+'" saved to server!','#4caf50'));
-    } else if (pwd!==null) { alert('❌ Wrong password! Saved locally only.'); }
+    syncToServer().then(()=>showSyncToast('✅ "'+key+'" saved to server!','#4caf50'));
     document.getElementById('calculatorSettingsModal').remove();
     openCalculatorSettings();
 }
@@ -3697,11 +3693,7 @@ function saveNewFormula() {
     const custom = JSON.parse(localStorage.getItem('customFormulas')||'{}');
     custom[name] = { pouchToShipper:ps, shipperToPallet:sp, pouchToPallet:ps*sp, speed:spd, unit };
     localStorage.setItem('customFormulas', JSON.stringify(custom));
-    const pwd = prompt('Enter admin password to save to server:');
-    const adminPwd = localStorage.getItem('admin_password')||'1234';
-    if (pwd===adminPwd) {
-        syncToServer().then(()=>showSyncToast('✅ "'+name+'" added to server!','#4caf50'));
-    } else if (pwd!==null) { alert('❌ Wrong password! Saved locally only.'); }
+    syncToServer().then(()=>showSyncToast('✅ "'+name+'" added to server!','#4caf50'));
     document.getElementById('calculatorSettingsModal').remove();
     openCalculatorSettings();
 }
