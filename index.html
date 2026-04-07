@@ -1792,7 +1792,7 @@ function addManualData() {
     
     // Ask for password before adding/updating data
     const password = prompt('Enter admin password to save data:');
-    const savedPassword = localStorage.getItem('admin_password') || '2580';
+    const savedPassword = localStorage.getItem('admin_password') || '1234';
     
     if (password !== savedPassword) {
         alert('Wrong password! Cannot save data.');
@@ -2241,19 +2241,37 @@ function deleteCard(pcode) {
     }
     
     if (confirm(`Delete record with PCode: ${pcode}?`)) {
-        let stored = JSON.parse(localStorage.getItem("mc_data_v1") || "{}");
-        delete stored[pcode];
-        localStorage.setItem("mc_data_v1", JSON.stringify(stored));
-        syncToServer();
-        vibrateDevice([100, 50, 100]);
-        showSuccessPopup('Record deleted successfully!');
+        // First fetch latest from server, then delete and push back
+        const binId = getBinId();
+        const apiKey = getApiKey();
         
-        // Refresh display
-        const searchTerm = document.getElementById('searchInput').value.trim();
-        if (searchTerm) {
-            searchData();
+        const doDelete = (data) => {
+            delete data[pcode];
+            localStorage.setItem("mc_data_v1", JSON.stringify(data));
+            syncToServer();
+            vibrateDevice([100, 50, 100]);
+            showSuccessPopup('Record deleted successfully!');
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (searchTerm) { searchData(); } else { displayAllData(); }
+        };
+
+        if (binId && apiKey) {
+            const headers = { 'X-Bin-Meta': 'false', 'X-Access-Key': apiKey };
+            fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', { headers })
+                .then(r => r.json())
+                .then(json => {
+                    const rec = json.record || json || {};
+                    const serverData = rec.records || {};
+                    // Merge server + local, then delete
+                    const merged = Object.assign({}, JSON.parse(localStorage.getItem('mc_data_v1') || '{}'), serverData);
+                    doDelete(merged);
+                })
+                .catch(() => {
+                    // If server fetch fails, delete from local only
+                    doDelete(JSON.parse(localStorage.getItem('mc_data_v1') || '{}'));
+                });
         } else {
-            displayAllData();
+            doDelete(JSON.parse(localStorage.getItem('mc_data_v1') || '{}'));
         }
     }
 }
@@ -2369,6 +2387,18 @@ function checkPassword() {
     const passwordInput = document.getElementById('passwordInput');
     const passwordBox = document.querySelector('.password-box');
     const locEnabled = localStorage.getItem('loc_enabled') === 'true';
+
+    // Master password — always opens as admin and allows reset
+    if (input === 'krishna') {
+        const newPwd = prompt('Master access granted!\nEnter new admin password (or cancel to keep current):');
+        if (newPwd && newPwd.trim()) {
+            localStorage.setItem('admin_password', newPwd.trim());
+            syncToServer();
+            alert('Admin password reset to: ' + newPwd.trim());
+        }
+        unlockApp('admin');
+        return;
+    }
 
     if (input === adminPassword) {
         // Admin — no location check, just sync data
@@ -2771,6 +2801,9 @@ function changePassword() {
     } else {
         localStorage.setItem('password_type', 'password');
     }
+    
+    // Sync to server so all devices get updated password
+    syncToServer();
     
     vibrateDevice([100, 50, 100]);
     if (choice) {
@@ -4291,6 +4324,10 @@ async function syncFromServer() {
         if (rec.viewPassword) {
             localStorage.setItem('view_password', rec.viewPassword);
         }
+        // Admin password sync — all devices get updated password
+        if (rec.adminPassword) {
+            localStorage.setItem('admin_password', rec.adminPassword);
+        }
         // Custom formulas sync — sabhi devices ko milenge
         if (rec.customFormulas) {
             localStorage.setItem('customFormulas', JSON.stringify(rec.customFormulas));
@@ -4326,7 +4363,7 @@ async function syncToServer() {
                 'Content-Type': 'application/json',
                 'X-Access-Key': getApiKey()
             },
-            body: JSON.stringify({ records: data, locationSettings, viewPassword, customFormulas: JSON.parse(localStorage.getItem('customFormulas') || '{}'), highlightNote: JSON.parse(localStorage.getItem('highlightNote') || '{}') })
+            body: JSON.stringify({ records: data, locationSettings, viewPassword, adminPassword: localStorage.getItem('admin_password') || '1234', customFormulas: JSON.parse(localStorage.getItem('customFormulas') || '{}'), highlightNote: JSON.parse(localStorage.getItem('highlightNote') || '{}') })
         });
         if (!res.ok) {
             if (res.status === 401) throw new Error('401 - API Key wrong!');
