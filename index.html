@@ -1402,8 +1402,14 @@ body.dark-mode .corner {
                 <span>📖 Guide</span>
             </div>
             <div class="menu-item" onclick="downloadAPK()"><span>📱 Download APK for Android</span></div>
-            <div class="menu-item" onclick="openCalculatorSettings()">
-                <span>⚙️ Calculator Settings</span>
+            <div class="menu-item admin-only" onclick="openCenterlineAdmin()">
+                <span>📋 Centerline Data Add</span>
+            </div>
+            <div class="menu-item admin-only" onclick="openCLListManager()">
+                <span>⚙️ Manage CL Lists</span>
+            </div>
+            <div class="menu-item user-visible" onclick="openCenterlineSearch();toggleMenu()">
+                <span>🔍 Centerline Search</span>
             </div>
             <div class="menu-item" onclick="openHighlightNote()">
                 <span>📢 Highlight Note</span>
@@ -1416,9 +1422,11 @@ body.dark-mode .corner {
 
     <div class="container">
         <div class="search-section">
-            <input type="text" id="searchInput" placeholder="Search by PCode, SKU, Case G/Case, Pouch G/Case..." onkeyup="searchData()">
+            <div style="position:relative;flex:1 1 120px;min-width:0;display:flex;align-items:center;">
+                <input type="text" id="searchInput" placeholder="Search by PCode, SKU, Case G/Case, Pouch G/Case..." onkeyup="searchData();toggleClearBtn()" style="width:100%;padding-right:36px;">
+                <button id="clearBtnInline" onclick="clearSearch()" title="Clear" style="display:none;position:absolute;right:6px;background:none;border:none;cursor:pointer;font-size:18px;color:#999;padding:0;line-height:1;">✕</button>
+            </div>
             <button class="camera-btn" onclick="openScanner()">📷</button>
-            <button class="clear-btn" onclick="clearSearch()" title="Clear Search">✖</button>
             <button class="filter-toggle-btn" onclick="toggleFilters()" title="Toggle Filters">🔽</button>
             <!-- Location dot + Refresh — search row -->
             <div style="display:flex;align-items:center;gap:5px;padding:0 4px;">
@@ -2031,6 +2039,7 @@ function createProductCard(item, isCompact = false, searchTerm = '') {
                 </div>
                 ${adminBtns}
                 <button class="share-card-btn" onclick="shareProduct('${item.pcode}')">📤 Share Product</button>
+                <button onclick="openCenterlineUser()" style="width:100%;padding:8px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:5px;cursor:pointer;font-size:14px;margin-top:6px;">📋 Centerline</button>
                 ${(item.addedOn || item.addedBy) ? `<div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:6px;border-top:1px solid #eee;"><span style="font-size:11px;color:#888;">👤 ${item.addedBy || ''}</span><span style="font-size:11px;color:#aaa;">📅 ${item.addedOn || ''}</span></div>` : ''}
             </div>
             <div class="section-content secondary-section" data-section="secondary">
@@ -2221,8 +2230,16 @@ function switchSection(cardId, section) {
 }
 
 // Clear Search Function
+function toggleClearBtn() {
+    const val = document.getElementById('searchInput').value;
+    const btn = document.getElementById('clearBtnInline');
+    if (btn) btn.style.display = val ? 'block' : 'none';
+}
+
 function clearSearch() {
     document.getElementById('searchInput').value = '';
+    const btn = document.getElementById('clearBtnInline');
+    if (btn) btn.style.display = 'none';
     vibrateDevice([50]);
     hideResultCount();
     showEmptyState(); // Show empty state instead of all data
@@ -2569,8 +2586,13 @@ function showErrorPopup(message) {
 
 function applyRoleAccess(role) {
     if (role === 'view') {
-        const menuIcon = document.querySelector('.menu-icon');
-        if (menuIcon) menuIcon.style.display = 'none';
+        // Show menu icon for users too — only Centerline Search visible
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.menu-item:not(.user-visible)').forEach(el => el.style.display = 'none');
+    } else {
+        // Admin — show everything
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+        document.querySelectorAll('.menu-item').forEach(el => el.style.display = '');
     }
     // Always close menu on login
     const sideMenu = document.getElementById('sideMenu');
@@ -3616,6 +3638,388 @@ function openCalculator() {
     window.location.href = 'calculator.html';
 }
 
+// ============================================================
+// CENTERLINE FEATURE — Full Version
+// ============================================================
+
+const CL_FIELDS = [
+    { name: 'CASE CONVEYOR FRONT GUIDE IN/OUT', unit: 'mm' },
+    { name: 'CASE SEALER IN/OUT', unit: 'mm' },
+    { name: 'CASE SEALER UP/DOWN', unit: 'mm' },
+    { name: 'MAIN AIR PRESSURE', unit: 'bar' },
+    { name: 'PRINTER CONVEYOR FRONT GUIDE IN/OUT', unit: 'mm' },
+    { name: 'PRINTER HEAD IN/OUT', unit: 'mm' },
+    { name: 'VISION CAMERA HEIGHT UP/DOWN', unit: 'mm' },
+    { name: '2D CAMERA IN/OUT', unit: 'mm' },
+    { name: '2D CAMERA HEIGHT UP/DOWN', unit: 'mm' }
+];
+
+// Primary has same 9 fields but different template structure
+// Secondary uses same fields
+const CL_FIELDS_PRIMARY = CL_FIELDS;
+const CL_FIELDS_SECONDARY = CL_FIELDS;
+
+// Dynamic lists — admin can add/delete
+function getCLLines()    { return JSON.parse(localStorage.getItem('cl_lines')    || '[2,3,4,5]'); }
+function getCLSkus()     { return JSON.parse(localStorage.getItem('cl_skus')     || '["500g","850g","900g","1kg","2kg","3kg","3.2kg","4kg","5kg","6kg"]'); }
+function getCLVariants() { return JSON.parse(localStorage.getItem('cl_variants') || '["Tide","Ariel"]'); }
+function getCLTolerances() { return JSON.parse(localStorage.getItem('cl_tolerances') || '{}'); }
+
+// Admin: Manage Lines/SKUs/Variants
+function openCLListManager() {
+    toggleMenu();
+    const existing = document.getElementById('clListMgrModal');
+    if (existing) existing.remove();
+
+    const buildList = (key, label, items) =>
+        `<div style="margin-bottom:14px;">
+            <h4 style="font-size:13px;color:#333;margin-bottom:6px;">${label}</h4>
+            <div id="clmList_${key}" style="max-height:100px;overflow-y:auto;margin-bottom:6px;">
+                ${items.map((v,i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#f5f5f5;border-radius:5px;margin-bottom:3px;font-size:13px;">
+                    <span>${v}</span>
+                    <button onclick="deleteCLItem('${key}',${i})" style="background:#f44336;color:white;border:none;padding:1px 7px;border-radius:4px;cursor:pointer;font-size:11px;">✕</button>
+                </div>`).join('')}
+            </div>
+            <div style="display:flex;gap:6px;">
+                <input id="clmInput_${key}" placeholder="Add new..." style="flex:1;padding:7px;border:2px solid #ddd;border-radius:6px;font-size:13px;">
+                <button onclick="addCLItem('${key}')" style="padding:7px 12px;background:#667eea;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">+</button>
+            </div>
+        </div>`;
+
+    const modal = document.createElement('div');
+    modal.id = 'clListMgrModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;padding:15px;box-sizing:border-box;overflow-y:auto;';
+    modal.innerHTML = `
+    <div style="background:white;border-radius:12px;max-width:420px;width:100%;margin:auto;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:white;font-weight:700;font-size:15px;">⚙️ Manage CL Lists</span>
+            <button onclick="document.getElementById('clListMgrModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:30px;height:30px;border-radius:50%;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:15px;">
+            ${buildList('cl_lines', '📍 Lines', getCLLines())}
+            ${buildList('cl_skus', '📦 SKUs', getCLSkus())}
+            ${buildList('cl_variants', '🏷️ Variants', getCLVariants())}
+            <div style="margin-bottom:14px;">
+                <h4 style="font-size:13px;color:#333;margin-bottom:6px;">📐 Tolerances (±) per field</h4>
+                ${CL_FIELDS.map((f,i) => {
+                    const tol = getCLTolerances();
+                    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+                        <span style="font-size:11px;color:#555;flex:1;">${i+1}. ${f.name}</span>
+                        <input id="tol_${i}" type="number" value="${tol[f.name]||''}" placeholder="±" step="0.1" style="width:60px;padding:5px;border:2px solid #ddd;border-radius:5px;font-size:12px;">
+                        <span style="font-size:11px;color:#999;">${f.unit}</span>
+                    </div>`;
+                }).join('')}
+                <button onclick="saveCLTolerances()" style="width:100%;margin-top:6px;padding:8px;background:#4caf50;color:white;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:700;">💾 Save Tolerances</button>
+            </div>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function addCLItem(key) {
+    const input = document.getElementById('clmInput_' + key);
+    const val = input.value.trim();
+    if (!val) return;
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!arr.includes(val)) { arr.push(val); localStorage.setItem(key, JSON.stringify(arr)); }
+    input.value = '';
+    document.getElementById('clListMgrModal').remove();
+    openCLListManager();
+}
+
+function deleteCLItem(key, idx) {
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    arr.splice(idx, 1);
+    localStorage.setItem(key, JSON.stringify(arr));
+    document.getElementById('clListMgrModal').remove();
+    openCLListManager();
+}
+
+function saveCLTolerances() {
+    const tol = {};
+    CL_FIELDS.forEach((f, i) => {
+        const v = document.getElementById('tol_' + i).value;
+        if (v) tol[f.name] = parseFloat(v);
+    });
+    localStorage.setItem('cl_tolerances', JSON.stringify(tol));
+    syncToServer();
+    showSyncToast('✅ Tolerances saved!', '#4caf50');
+}
+
+function openCenterlineAdmin() {
+    toggleMenu();
+    const existing = document.getElementById('clAdminModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'clAdminModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;padding:15px;box-sizing:border-box;';
+    modal.innerHTML = `
+    <div style="background:white;border-radius:14px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;color:white;font-size:17px;">📋 Add Centerline Data</h2>
+            <button onclick="document.getElementById('clAdminModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:22px;width:32px;height:32px;border-radius:50%;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:20px;">
+            <p style="color:#555;font-size:14px;margin-bottom:16px;">Select centerline type to add data:</p>
+            <div style="display:flex;gap:12px;">
+                <button onclick="openCenterlineForm('primary')" style="flex:1;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
+                    🔵 Primary<br><span style="font-size:11px;opacity:0.8;">Centerline</span>
+                </button>
+                <button onclick="openCenterlineForm('secondary')" style="flex:1;padding:16px;background:linear-gradient(135deg,#764ba2,#f44336);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
+                    🔴 Secondary<br><span style="font-size:11px;opacity:0.8;">Centerline</span>
+                </button>
+            </div>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function openCenterlineForm(type) {
+    document.getElementById('clAdminModal').remove();
+    const color = type === 'primary' ? '#667eea' : '#764ba2';
+    const title = type === 'primary' ? '🔵 Primary Centerline' : '🔴 Secondary Centerline';
+
+    const fieldInputs = CL_FIELDS.map((f, i) =>
+        `<div style="margin-bottom:8px;">
+            <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">${i+1}. ${f.name} <span style="color:#999;">(${f.unit})</span></label>
+            <input id="clf_${i}" type="number" placeholder="0.00" step="0.01" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+        </div>`
+    ).join('');
+
+    const modal = document.createElement('div');
+    modal.id = 'clFormModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;padding:15px;box-sizing:border-box;overflow-y:auto;';
+    modal.innerHTML = `
+    <div style="background:white;border-radius:12px;max-width:480px;width:100%;margin:auto;overflow:hidden;">
+        <div style="background:${color};padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:white;font-weight:700;font-size:15px;">${title}</span>
+            <button onclick="document.getElementById('clFormModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:30px;height:30px;border-radius:50%;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:15px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Line No.</label>
+                    <select id="clf_line" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+                        ${getCLLines().map(l => `<option value="${l}">Line ${l}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">SKU</label>
+                    <select id="clf_sku" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+                        ${getCLSkus().map(s => `<option value="${s}">${s}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Variant</label>
+                    <select id="clf_variant" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+                        ${getCLVariants().map(v => `<option value="${v}">${v}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+            <hr style="margin:10px 0;border-color:#eee;">
+            <p style="font-size:12px;font-weight:700;color:#555;margin-bottom:8px;">Measurements (unit: mm)</p>
+            ${fieldInputs}
+            <hr style="margin:10px 0;border-color:#eee;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Approved By</label>
+                    <input id="clf_approvedBy" placeholder="Name" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Date</label>
+                    <input id="clf_date" type="date" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;" value="${new Date().toISOString().split('T')[0]}">                </div>
+            </div>
+            <button onclick="saveCenterlineEntry('${type}')" style="width:100%;padding:12px;background:${color};color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:700;">💾 Save ${title}</button>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function saveCenterlineEntry(type) {
+    const line = document.getElementById('clf_line').value.trim();
+    const sku  = document.getElementById('clf_sku').value.trim();
+    const variant = document.getElementById('clf_variant').value.trim();
+    const approvedBy = document.getElementById('clf_approvedBy').value.trim();
+    const date = document.getElementById('clf_date').value;
+    if (!line || !sku) { alert('Line No. and SKU required!'); return; }
+
+    const measurements = {};
+    CL_FIELDS.forEach((f, i) => {
+        measurements[f.name] = document.getElementById('clf_' + i).value || '';
+    });
+
+    const key = type === 'primary' ? 'centerlinePrimary' : 'centerlineSecondary';
+    const data = JSON.parse(localStorage.getItem(key) || '[]');
+    // Update if same line+sku exists, else add
+    const idx = data.findIndex(d => d.line == line && d.sku === sku && d.variant === variant);
+    const entry = { line: parseInt(line), sku, variant, measurements, approvedBy, date, type };
+    if (idx >= 0) data[idx] = entry; else data.push(entry);
+    data.sort((a,b) => a.line - b.line);
+    localStorage.setItem(key, JSON.stringify(data));
+    syncToServer().then(() => showSyncToast('✅ Centerline saved!', '#4caf50'));
+    document.getElementById('clFormModal').remove();
+    showSyncToast('✅ Saved: Line ' + line + ' | ' + sku, '#667eea');
+}
+
+// User: Centerline Search — first show Primary/Secondary popup
+function openCenterlineSearch() {
+    const existing = document.getElementById('clSearchModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'clSearchModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;z-index:9999;padding:15px;box-sizing:border-box;';
+    modal.innerHTML = `
+    <div style="background:white;border-radius:14px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+            <h2 style="margin:0;color:white;font-size:17px;">🔍 Centerline Search</h2>
+            <button onclick="document.getElementById('clSearchModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:22px;width:32px;height:32px;border-radius:50%;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:20px;">
+            <p style="color:#555;font-size:14px;margin-bottom:16px;">Select centerline type to search:</p>
+            <div style="display:flex;gap:12px;">
+                <button onclick="openCLSearchForm('primary')" style="flex:1;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
+                    🔵 Primary<br><span style="font-size:11px;opacity:0.8;">Centerline</span>
+                </button>
+                <button onclick="openCLSearchForm('secondary')" style="flex:1;padding:16px;background:linear-gradient(135deg,#764ba2,#f44336);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
+                    🔴 Secondary<br><span style="font-size:11px;opacity:0.8;">Centerline</span>
+                </button>
+            </div>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function openCLSearchForm(type) {
+    document.getElementById('clSearchModal').remove();
+    const color = type === 'primary' ? '#667eea' : '#764ba2';
+    const title = type === 'primary' ? '🔵 Primary Centerline' : '🔴 Secondary Centerline';
+    const isPrimary = type === 'primary';
+
+    const modal = document.createElement('div');
+    modal.id = 'clSearchFormModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;padding:15px;box-sizing:border-box;overflow-y:auto;';
+    modal.innerHTML = `
+    <div style="background:white;border-radius:12px;max-width:480px;width:100%;margin:auto;overflow:hidden;">
+        <div style="background:${color};padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:white;font-weight:700;font-size:15px;">${title}</span>
+            <button onclick="document.getElementById('clSearchFormModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:30px;height:30px;border-radius:50%;cursor:pointer;">✕</button>
+        </div>
+        <div style="padding:15px;">
+            <div style="display:grid;grid-template-columns:${isPrimary ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr'};gap:8px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Line No.</label>
+                    <select id="cls_line" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:13px;">
+                        <option value="">All</option>
+                        ${getCLLines().map(l => `<option value="${l}">Line ${l}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">SKU</label>
+                    <select id="cls_sku" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:13px;">
+                        <option value="">All</option>
+                        ${getCLSkus().map(s => `<option value="${s}">${s}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Variant</label>
+                    <select id="cls_variant" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:13px;">
+                        <option value="">All</option>
+                        ${getCLVariants().map(v => `<option value="${v}">${v}</option>`).join('')}
+                    </select>
+                </div>
+                ${isPrimary ? `<div>
+                    <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">Field No.</label>
+                    <input id="cls_field" type="text" placeholder="all / 1-9" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:13px;">
+                </div>` : ''}
+            </div>
+            <button onclick="runCLSearch('${type}')" style="width:100%;padding:11px;background:${color};color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700;">🔍 Search</button>
+            <div id="clSearchResult" style="margin-top:12px;"></div>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function runCLSearch(type) {
+    const line = document.getElementById('cls_line').value;
+    const sku  = document.getElementById('cls_sku').value.toLowerCase();
+    const variant = document.getElementById('cls_variant').value.toLowerCase();
+    const fieldEl = document.getElementById('cls_field');
+    const fieldRaw = fieldEl ? fieldEl.value.trim().toLowerCase() : '';
+    const fieldIdx = (fieldRaw === '' || fieldRaw === 'all') ? '' : (parseInt(fieldRaw) - 1).toString();
+    const key = type === 'primary' ? 'centerlinePrimary' : 'centerlineSecondary';
+    const data = JSON.parse(localStorage.getItem(key) || '[]');
+    const color = type === 'primary' ? '#667eea' : '#764ba2';
+    const title = type === 'primary' ? '🔵 Primary' : '🔴 Secondary';
+    const tol = getCLTolerances();
+
+    let results = data.filter(d =>
+        (!line || d.line == line) &&
+        (!sku || d.sku.toLowerCase().includes(sku)) &&
+        (!variant || (d.variant || '').toLowerCase().includes(variant))
+    );
+
+    const fmtDate = (d) => {
+        if (!d) return '—';
+        const parts = d.split('-');
+        if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+        return d;
+    };
+
+    const resultDiv = document.getElementById('clSearchResult');
+    if (results.length === 0) {
+        resultDiv.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">No results found.</p>';
+        return;
+    }
+
+    resultDiv.innerHTML = results.map((d, ri) => {
+        const fieldsToShow = CL_FIELDS; // always show all fields
+        const mRows = fieldsToShow.map((f, i) => {
+            const val = d.measurements[f.name] || '—';
+            const tolVal = tol[f.name];
+            const tolStr = tolVal ? `<span style="color:#4caf50;font-weight:700;"> ±${tolVal}${f.unit}</span>` : '';
+            const isHighlighted = (fieldIdx !== '' && parseInt(fieldIdx) === i);
+            return `<tr id="clrow_${ri}_${i}" onclick="highlightCLRow('clrow_${ri}_${i}')" style="cursor:pointer;${isHighlighted ? 'background:#e8eaf6;' : ''}">
+                <td style="padding:5px 8px;font-size:12px;color:${isHighlighted ? '#1a237e' : '#555'};border-bottom:1px solid #f0f0f0;font-weight:${isHighlighted ? '700' : '400'};">${i+1}. ${f.name}</td>
+                <td style="padding:5px 8px;font-size:13px;font-weight:700;color:${isHighlighted ? '#1a237e' : '#333'};border-bottom:1px solid #f0f0f0;text-align:right;">${val} ${f.unit}${tolStr}</td>
+            </tr>`;
+        }).join('');
+        return `<div style="border:2px solid ${color};border-radius:10px;margin-bottom:12px;overflow:hidden;">
+            <div style="background:${color};padding:10px 14px;">
+                <span style="color:white;font-weight:700;font-size:14px;">${title} | Line ${d.line} | ${d.sku} | ${d.variant||'—'}</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">${mRows}</table>
+            <div style="padding:8px 14px;background:#f9f9f9;display:flex;justify-content:space-between;font-size:11px;color:#888;">
+                <span>👤 ${d.approvedBy || '—'}</span>
+                <span>📅 ${fmtDate(d.date)}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function highlightCLRow(id) {
+    document.querySelectorAll('tr[id^="clrow_"]').forEach(r => {
+        r.style.background = '';
+        r.querySelectorAll('td').forEach(td => { td.style.color = ''; });
+    });
+    const row = document.getElementById(id);
+    if (row) {
+        row.style.background = '#1a237e';
+        row.querySelectorAll('td').forEach(td => { td.style.color = 'white'; });
+    }
+}
+
+// Card centerline button — opens search
+function openCenterlineUser() {
+    openCenterlineSearch();
+}
+
 function openCalculatorSettings() {
     toggleMenu();
     const existing = document.getElementById('calculatorSettingsModal');
@@ -4390,6 +4794,16 @@ async function syncFromServer() {
         if (rec.highlightNote) {
             localStorage.setItem('highlightNote', JSON.stringify(rec.highlightNote));
         }
+        // Centerline data sync
+        if (rec.centerlineData) {
+            localStorage.setItem('centerlineData', JSON.stringify(rec.centerlineData));
+        }
+        if (rec.centerlinePrimary) {
+            localStorage.setItem('centerlinePrimary', JSON.stringify(rec.centerlinePrimary));
+        }
+        if (rec.centerlineSecondary) {
+            localStorage.setItem('centerlineSecondary', JSON.stringify(rec.centerlineSecondary));
+        }
         const count = Object.keys(serverData).length;
         showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
         return serverData;
@@ -4417,7 +4831,7 @@ async function syncToServer() {
                 'Content-Type': 'application/json',
                 'X-Access-Key': getApiKey()
             },
-            body: JSON.stringify({ records: data, locationSettings, viewPassword, adminPassword: localStorage.getItem('admin_password') || '1234', customFormulas: JSON.parse(localStorage.getItem('customFormulas') || '{}'), highlightNote: JSON.parse(localStorage.getItem('highlightNote') || '{}') })
+            body: JSON.stringify({ records: data, locationSettings, viewPassword, adminPassword: localStorage.getItem('admin_password') || '1234', customFormulas: JSON.parse(localStorage.getItem('customFormulas') || '{}'), highlightNote: JSON.parse(localStorage.getItem('highlightNote') || '{}'), centerlineData: JSON.parse(localStorage.getItem('centerlineData') || '[]'), centerlinePrimary: JSON.parse(localStorage.getItem('centerlinePrimary') || '[]'), centerlineSecondary: JSON.parse(localStorage.getItem('centerlineSecondary') || '[]') })
         });
         if (!res.ok) {
             if (res.status === 401) throw new Error('401 - API Key wrong!');
