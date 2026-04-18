@@ -1337,7 +1337,7 @@ body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
             <h2>Digital Control Copy</h2>
             <p>Enter password to access</p>
             <div id="gpsWarning" style="display:none;color:#f44336;font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;"></div>
-            <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()">
+            <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <button onclick="checkPassword()">Unlock</button>
             <!-- Two fingerprint buttons -->
             <div style="display:flex;justify-content:center;gap:30px;margin-top:15px;">
@@ -2361,7 +2361,22 @@ function downloadTemplate() {
     toggleMenu();
 }
 
+// Clear password on back navigation (pageshow fires on bfcache restore)
+window.addEventListener('pageshow', function(e) {
+    const pi = document.getElementById('passwordInput');
+    if (pi) pi.value = '';
+});
+
 window.onload = function() {
+    // Clear password input to prevent autofill and browser restore
+    setTimeout(() => {
+        const pi = document.getElementById('passwordInput');
+        if (pi) pi.value = '';
+    }, 100);
+    setTimeout(() => {
+        const pi = document.getElementById('passwordInput');
+        if (pi) pi.value = '';
+    }, 500);
     // Show password screen on load
     showPasswordScreen();
     // Load saved theme
@@ -3640,6 +3655,9 @@ function downloadAPK() {
 
 // ===== CALCULATOR =====
 function openCalculator() {
+    // Clear password before navigating
+    const pi = document.getElementById('passwordInput');
+    if (pi) pi.value = '';
     window.location.href = 'calculator.html';
 }
 
@@ -4879,59 +4897,16 @@ function stopAutoSync() {
     }
 }
 
-// ============================================================
-// AUTO LOCK — 1 minute inactivity
-// ============================================================
+// AUTO LOCK — DISABLED
 let _autoLockTimer = null;
-const AUTO_LOCK_MS = 60000; // 1 minute
+const AUTO_LOCK_MS = 60000;
+function resetAutoLock() {}
+function autoLockApp() {}
 
-function resetAutoLock() {
-    if (!window._userRole) return; // not logged in — don't reset
-    clearTimeout(_autoLockTimer);
-    _autoLockTimer = setTimeout(() => {
-        if (window._userRole) {
-            autoLockApp();
-        }
-    }, AUTO_LOCK_MS);
-}
-
-function autoLockApp() {
-    window._userRole = null;
-    clearTimeout(_autoLockTimer);
-    _autoLockTimer = null;
-    // Show lock screen
-    const ps = document.getElementById('passwordScreen');
-    if (ps) {
-        ps.style.display = 'flex';
-        ps.style.zIndex = '9999';
-    }
-    // Clear input and focus
-    const pi = document.getElementById('passwordInput');
-    if (pi) {
-        pi.value = '';
-        setTimeout(() => { pi.focus(); }, 300);
-    }
-    const err = document.getElementById('passwordError');
-    if (err) { err.textContent = '🔒 Auto locked'; err.style.color = '#ff9800'; }
-    // Clear results
-    const rc = document.getElementById('resultsContainer');
-    if (rc) rc.innerHTML = '';
-    hideResultCount();
-    stopLocationWatch();
-    // Close any open modals
-    ['calcSettingsModal','clSearchFormModal','clSearchModal','clAdminModal','clFormModal','centerlineAdminModal'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.remove();
-    });
-    // Close side menu
-    const sm = document.getElementById('sideMenu');
-    if (sm) sm.classList.remove('active');
-}
-
-// Track user activity
-['touchstart','touchmove','click','keydown','scroll','mousemove'].forEach(evt => {
-    document.addEventListener(evt, resetAutoLock, { passive: true });
-});
+// Track user activity — disabled
+// ['touchstart','touchmove','click','keydown','scroll','mousemove'].forEach(evt => {
+//     document.addEventListener(evt, resetAutoLock, { passive: true });
+// });
 
 function unlockApp(role) {
     window._userRole = role || 'admin';
@@ -4940,8 +4915,6 @@ function unlockApp(role) {
     const sideMenu = document.getElementById('sideMenu');
     if (sideMenu) sideMenu.classList.remove('active');
     vibrateDevice([100]);
-    // Start auto lock timer
-    resetAutoLock();
     loadDarkMode();
     loadTheme();
     showEmptyState();
