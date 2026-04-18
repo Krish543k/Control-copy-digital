@@ -1613,6 +1613,10 @@ body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
 function toggleMenu() {
     const menu = document.getElementById('sideMenu');
     menu.classList.toggle('active');
+    // Re-apply role access every time menu opens
+    if (menu.classList.contains('active') && window._userRole) {
+        applyRoleAccess(window._userRole);
+    }
 }
 
 function openUploadModal() {
