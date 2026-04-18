@@ -3786,7 +3786,8 @@ function openStaticCenterline() {
     openCenterlineAdmin();
 }
 function openCenterlineForm(type) {
-    document.getElementById('clAdminModal').remove();
+    const _adm = document.getElementById('clAdminModal');
+    if (_adm) _adm.remove();
     const color = type === 'primary' ? '#667eea' : '#764ba2';
     const title = type === 'primary' ? '🔵 Primary Centerline' : '🔴 Secondary Centerline';
 
@@ -3804,12 +3805,12 @@ function openCenterlineForm(type) {
 
     const modal = document.createElement('div');
     modal.id = 'clFormModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;padding:10px;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px;box-sizing:border-box;';
     modal.innerHTML = `
-    <div style="background:white;border-radius:12px;max-width:480px;width:100%;margin:auto;overflow:hidden;">
-        <div style="background:${color};padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="background:white;border-radius:12px;max-width:480px;width:100%;margin:10px auto 30px auto;overflow:visible;">
+        <div style="background:${color};padding:14px 18px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1;">
             <span style="color:white;font-weight:700;font-size:15px;">${title}</span>
-            <button onclick="document.getElementById('clFormModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:30px;height:30px;border-radius:50%;cursor:pointer;">✕</button>
+            <button onclick="document.getElementById('clFormModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:20px;width:34px;height:34px;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;">✕</button>
         </div>
         <div style="padding:15px;">
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
