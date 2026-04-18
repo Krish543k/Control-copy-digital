@@ -1400,11 +1400,11 @@ body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
                 <span>🔐 Privacy Settings</span>
             </div>
             <div class="menu-item" onclick="openFullGuide();toggleMenu()">
-                <span>� Guide</span>
+                <span>📖 Guide</span>
             </div>
-            <div class="menu-item" onclick="downloadAPK()"><span>� Download APK for Android</span></div>
+            <div class="menu-item" onclick="downloadAPK()"><span>📱 Download APK for Android</span></div>
             <div class="menu-item admin-only" onclick="openHighlightNote()">
-                <span>� Highlight Note</span>
+                <span>📢 Highlight Note</span>
             </div>
             <div class="menu-item" onclick="logoutApp()" style="border-top: 2px solid #f44336;">
                 <span style="color:#f44336;">🚪 Logout</span>
@@ -3858,26 +3858,42 @@ function saveCenterlineEntry(type) {
     const sku  = document.getElementById('clf_sku').value.trim();
     const variant = document.getElementById('clf_variant').value.trim();
     const approvedBy = document.getElementById('clf_approvedBy').value.trim();
-    const date = document.getElementById('clf_date').value;
-    if (!line || !sku) { alert('Line No. and SKU required!'); return; }
+    const rawDate = document.getElementById('clf_date').value;
+    const dateParts = rawDate.split('-');
+    const date = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : rawDate;
 
+    // Validate all required fields
+    if (!line) { alert('⚠️ Line No. is empty!\nPlease select a Line.'); return; }
+    if (!sku)  { alert('⚠️ SKU is empty!\nPlease select a SKU.'); return; }
+    if (!variant) { alert('⚠️ Variant is empty!\nPlease select a Variant.'); return; }
+    if (!approvedBy) { alert('⚠️ Approved By is empty!\nPlease enter the approver name.'); return; }
+    if (!rawDate) { alert('⚠️ Date is empty!\nPlease select a date.'); return; }
+
+    // Validate all measurement fields
     const measurements = {};
     const tolerances = {};
-    CL_FIELDS.forEach((f, i) => {
-        measurements[f.name] = document.getElementById('clf_' + i).value || '';
-        const t = document.getElementById('clt_' + i).value;
+    let emptyField = null;
+    for (let i = 0; i < CL_FIELDS.length; i++) {
+        const f = CL_FIELDS[i];
+        const val = document.getElementById('clf_' + i).value.trim();
+        if (!val) { emptyField = `${i+1}. ${f.name}`; break; }
+        measurements[f.name] = val;
+        const t = document.getElementById('clt_' + i).value.trim();
         if (t) tolerances[f.name] = parseFloat(t);
-    });
+    }
+    if (emptyField) {
+        alert(`⚠️ Field is empty!\n\n"${emptyField}"\n\nPlease fill all measurement fields before saving.`);
+        return;
+    }
 
     const key = type === 'primary' ? 'centerlinePrimary' : 'centerlineSecondary';
     const data = JSON.parse(localStorage.getItem(key) || '[]');
-    // Update if same line+sku exists, else add
     const idx = data.findIndex(d => d.line == line && d.sku === sku && d.variant === variant);
     const entry = { line: parseInt(line), sku, variant, measurements, tolerances, approvedBy, date, type };
     if (idx >= 0) data[idx] = entry; else data.push(entry);
     data.sort((a,b) => a.line - b.line);
     localStorage.setItem(key, JSON.stringify(data));
-    syncToServer().then(() => showSyncToast('✅ Centerline saved!', '#4caf50'));
+    syncToServer().then(() => showSyncToast('✅ Centerline saved to server!', '#4caf50'));
     document.getElementById('clFormModal').remove();
     showSyncToast('✅ Saved: Line ' + line + ' | ' + sku, '#667eea');
 }
