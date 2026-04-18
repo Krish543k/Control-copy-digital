@@ -1297,10 +1297,6 @@ body.dark-mode .corner {
         font-size: 22px;
     }
 }
-
-/* Screenshot prevention */
-body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
-@media print { body { display: none !important; } }
     </style>
 </head>
 
@@ -1337,7 +1333,7 @@ body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
             <h2>Digital Control Copy</h2>
             <p>Enter password to access</p>
             <div id="gpsWarning" style="display:none;color:#f44336;font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;"></div>
-            <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()">
             <button onclick="checkPassword()">Unlock</button>
             <!-- Two fingerprint buttons -->
             <div style="display:flex;justify-content:center;gap:30px;margin-top:15px;">
@@ -2361,22 +2357,7 @@ function downloadTemplate() {
     toggleMenu();
 }
 
-// Clear password on back navigation (pageshow fires on bfcache restore)
-window.addEventListener('pageshow', function(e) {
-    const pi = document.getElementById('passwordInput');
-    if (pi) pi.value = '';
-});
-
 window.onload = function() {
-    // Clear password input to prevent autofill and browser restore
-    setTimeout(() => {
-        const pi = document.getElementById('passwordInput');
-        if (pi) pi.value = '';
-    }, 100);
-    setTimeout(() => {
-        const pi = document.getElementById('passwordInput');
-        if (pi) pi.value = '';
-    }, 500);
     // Show password screen on load
     showPasswordScreen();
     // Load saved theme
@@ -2490,8 +2471,7 @@ function checkPassword() {
             setTimeout(() => {
                 if (isJsonBinConfigured()) {
                     syncFromServer().then(merged => {
-                        // Only show record count to admin
-                        if (merged) showSyncToast('✅ Synced', '#667eea');
+                        if (merged) showSyncToast(Object.keys(merged).length + ' records synced', '#667eea');
                     });
                 }
                 unlockApp('admin');
@@ -2719,7 +2699,7 @@ async function useFingerprintAuth(role) {
             // Admin — no location check
             if (isJsonBinConfigured()) {
                 syncFromServer().then(merged => {
-                    if (merged) showSyncToast('✅ Synced', '#667eea');
+                    if (merged) showSyncToast(Object.keys(merged).length + ' records on server', '#667eea');
                 });
             }
             unlockApp('admin');
@@ -3655,9 +3635,6 @@ function downloadAPK() {
 
 // ===== CALCULATOR =====
 function openCalculator() {
-    // Clear password before navigating
-    const pi = document.getElementById('passwordInput');
-    if (pi) pi.value = '';
     window.location.href = 'calculator.html';
 }
 
@@ -4844,7 +4821,7 @@ async function syncFromServer() {
             localStorage.setItem('centerlineSecondary', JSON.stringify(rec.centerlineSecondary));
         }
         const count = Object.keys(serverData).length;
-        showSyncToast('✅ Synced', '#4CAF50');
+        showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
         return serverData;
     } catch (err) {
         showSyncToast('❌ ' + err.message, '#f44336');
@@ -4896,17 +4873,6 @@ function stopAutoSync() {
         _syncPollInterval = null;
     }
 }
-
-// AUTO LOCK — DISABLED
-let _autoLockTimer = null;
-const AUTO_LOCK_MS = 60000;
-function resetAutoLock() {}
-function autoLockApp() {}
-
-// Track user activity — disabled
-// ['touchstart','touchmove','click','keydown','scroll','mousemove'].forEach(evt => {
-//     document.addEventListener(evt, resetAutoLock, { passive: true });
-// });
 
 function unlockApp(role) {
     window._userRole = role || 'admin';
