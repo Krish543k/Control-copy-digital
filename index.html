@@ -1613,10 +1613,6 @@ body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
 function toggleMenu() {
     const menu = document.getElementById('sideMenu');
     menu.classList.toggle('active');
-    // Re-apply role access every time menu opens
-    if (menu.classList.contains('active') && window._userRole) {
-        applyRoleAccess(window._userRole);
-    }
 }
 
 function openUploadModal() {
@@ -2598,17 +2594,14 @@ function showErrorPopup(message) {
 
 function applyRoleAccess(role) {
     if (role === 'view') {
-        // Show menu icon for users too — only Centerline Search visible
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.menu-item:not(.user-visible)').forEach(el => el.style.display = 'none');
+        // Hide all menu items first, then show only user-visible
+        document.querySelectorAll('.menu-item').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.menu-item.user-visible').forEach(el => el.style.display = 'block');
     } else {
         // Admin — show everything
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
         document.querySelectorAll('.menu-item').forEach(el => el.style.display = '');
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
     }
-    // Always close menu on login
-    const sideMenu = document.getElementById('sideMenu');
-    if (sideMenu) sideMenu.classList.remove('active');
 }
 
 // Role access applied at login
