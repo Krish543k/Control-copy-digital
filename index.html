@@ -1297,6 +1297,10 @@ body.dark-mode .corner {
         font-size: 22px;
     }
 }
+
+/* Screenshot prevention */
+body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+@media print { body { display: none !important; } }
     </style>
 </head>
 
@@ -1333,7 +1337,7 @@ body.dark-mode .corner {
             <h2>Digital Control Copy</h2>
             <p>Enter password to access</p>
             <div id="gpsWarning" style="display:none;color:#f44336;font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;"></div>
-            <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()">
+            <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <button onclick="checkPassword()">Unlock</button>
             <!-- Two fingerprint buttons -->
             <div style="display:flex;justify-content:center;gap:30px;margin-top:15px;">
@@ -1386,33 +1390,21 @@ body.dark-mode .corner {
             <div class="menu-item" onclick="openManualEntryModal()">
                 <span>✏️ Add Manual Data</span>
             </div>
-            <div class="menu-item" onclick="toggleDarkMode()">
-                <span id="darkModeMenuText">🌙 Dark Mode</span>
+            <div class="menu-item user-visible" onclick="openCenterlineSearch();toggleMenu()">
+                <span>🔍 Centerline Search</span>
             </div>
-            <div class="menu-item" onclick="openThemeSelector()">
-                <span>🎨 Change Theme</span>
+            <div class="menu-item admin-only" onclick="openStaticCenterline();toggleMenu()">
+                <span>📌 Static Centerline</span>
             </div>
             <div class="menu-item" onclick="openPrivacySettings()" style="background:linear-gradient(135deg,#667eea15,#764ba215);border-left:3px solid #667eea;">
                 <span>🔐 Privacy Settings</span>
             </div>
-            <div class="menu-item" onclick="openLocationSettings()">
-                <span>📍 Location Settings</span>
-            </div>
             <div class="menu-item" onclick="openFullGuide();toggleMenu()">
-                <span>📖 Guide</span>
+                <span>� Guide</span>
             </div>
-            <div class="menu-item" onclick="downloadAPK()"><span>📱 Download APK for Android</span></div>
-            <div class="menu-item admin-only" onclick="openCenterlineAdmin()">
-                <span>📋 Centerline Data Add</span>
-            </div>
-            <div class="menu-item admin-only" onclick="openCLListManager()">
-                <span>⚙️ Manage CL Lists</span>
-            </div>
-            <div class="menu-item user-visible" onclick="openCenterlineSearch();toggleMenu()">
-                <span>🔍 Centerline Search</span>
-            </div>
-            <div class="menu-item" onclick="openHighlightNote()">
-                <span>📢 Highlight Note</span>
+            <div class="menu-item" onclick="downloadAPK()"><span>� Download APK for Android</span></div>
+            <div class="menu-item admin-only" onclick="openHighlightNote()">
+                <span>� Highlight Note</span>
             </div>
             <div class="menu-item" onclick="logoutApp()" style="border-top: 2px solid #f44336;">
                 <span style="color:#f44336;">🚪 Logout</span>
@@ -2357,7 +2349,22 @@ function downloadTemplate() {
     toggleMenu();
 }
 
+// Clear password on back navigation (pageshow fires on bfcache restore)
+window.addEventListener('pageshow', function(e) {
+    const pi = document.getElementById('passwordInput');
+    if (pi) pi.value = '';
+});
+
 window.onload = function() {
+    // Clear password input to prevent autofill and browser restore
+    setTimeout(() => {
+        const pi = document.getElementById('passwordInput');
+        if (pi) pi.value = '';
+    }, 100);
+    setTimeout(() => {
+        const pi = document.getElementById('passwordInput');
+        if (pi) pi.value = '';
+    }, 500);
     // Show password screen on load
     showPasswordScreen();
     // Load saved theme
@@ -2471,7 +2478,8 @@ function checkPassword() {
             setTimeout(() => {
                 if (isJsonBinConfigured()) {
                     syncFromServer().then(merged => {
-                        if (merged) showSyncToast(Object.keys(merged).length + ' records synced', '#667eea');
+                        // Only show record count to admin
+                        if (merged) showSyncToast('✅ Synced', '#667eea');
                     });
                 }
                 unlockApp('admin');
@@ -2699,7 +2707,7 @@ async function useFingerprintAuth(role) {
             // Admin — no location check
             if (isJsonBinConfigured()) {
                 syncFromServer().then(merged => {
-                    if (merged) showSyncToast(Object.keys(merged).length + ' records on server', '#667eea');
+                    if (merged) showSyncToast('✅ Synced', '#667eea');
                 });
             }
             unlockApp('admin');
@@ -3628,14 +3636,14 @@ function openFullGuide() {
 
 // Download APK function placeholder
 function downloadAPK() {
-    alert('📱 APK Download\n\nTo create APK:\n\n1. Use Cordova (see APK-KAISE-BANAYE.txt)\n2. Or use online tools like:\n   - PWA Builder (pwabuilder.com)\n   - APK Generator\n\n3. Upload to GitHub Pages first\n4. Then convert to APK');
+    alert('📱 Android APK\n\nComing Soon!\n\nThis feature will be available in a future update.');
     toggleMenu();
 }
 
 
 // ===== CALCULATOR =====
 function openCalculator() {
-    window.location.href = 'calculator.html';
+    window.open('calculator.html', '_blank');
 }
 
 // ============================================================
@@ -3712,6 +3720,8 @@ function addCLItem(key) {
     const arr = JSON.parse(localStorage.getItem(key) || '[]');
     if (!arr.includes(val)) { arr.push(val); localStorage.setItem(key, JSON.stringify(arr)); }
     input.value = '';
+    // Sync to server so all users get updated lists
+    syncToServer();
     document.getElementById('clListMgrModal').remove();
     openCLListManager();
 }
@@ -3720,6 +3730,7 @@ function deleteCLItem(key, idx) {
     const arr = JSON.parse(localStorage.getItem(key) || '[]');
     arr.splice(idx, 1);
     localStorage.setItem(key, JSON.stringify(arr));
+    syncToServer();
     document.getElementById('clListMgrModal').remove();
     openCLListManager();
 }
@@ -3736,7 +3747,6 @@ function saveCLTolerances() {
 }
 
 function openCenterlineAdmin() {
-    toggleMenu();
     const existing = document.getElementById('clAdminModal');
     if (existing) existing.remove();
 
@@ -3746,18 +3756,24 @@ function openCenterlineAdmin() {
     modal.innerHTML = `
     <div style="background:white;border-radius:14px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
         <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
-            <h2 style="margin:0;color:white;font-size:17px;">📋 Add Centerline Data</h2>
+            <h2 style="margin:0;color:white;font-size:17px;">� Static Centerline</h2>
             <button onclick="document.getElementById('clAdminModal').remove()" style="background:rgba(255,255,255,0.2);border:none;color:white;font-size:22px;width:32px;height:32px;border-radius:50%;cursor:pointer;">✕</button>
         </div>
-        <div style="padding:20px;">
-            <p style="color:#555;font-size:14px;margin-bottom:16px;">Select centerline type to add data:</p>
-            <div style="display:flex;gap:12px;">
-                <button onclick="openCenterlineForm('primary')" style="flex:1;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
-                    🔵 Primary<br><span style="font-size:11px;opacity:0.8;">Centerline</span>
-                </button>
-                <button onclick="openCenterlineForm('secondary')" style="flex:1;padding:16px;background:linear-gradient(135deg,#764ba2,#f44336);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
-                    🔴 Secondary<br><span style="font-size:11px;opacity:0.8;">Centerline</span>
-                </button>
+        <div style="padding:10px 0;">
+            <div onclick="alert('🔵 Primary Centerline\\n\\nComing Soon!\\n\\nTemplate will be added in a future update.');" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;opacity:0.6;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔵</div>
+                <div><div style="font-weight:700;color:#333;font-size:15px;">Add Primary Centerline</div><div style="font-size:12px;color:#f44336;font-weight:600;">Coming Soon</div></div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('clAdminModal').remove();openCenterlineForm('secondary');" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:linear-gradient(135deg,#764ba2,#f44336);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔴</div>
+                <div><div style="font-weight:700;color:#333;font-size:15px;">Add Secondary Centerline</div><div style="font-size:12px;color:#888;">Add secondary centerline data</div></div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('clAdminModal').remove();openCLListManager();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#e8f5e9;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚙️</div>
+                <div><div style="font-weight:700;color:#333;font-size:15px;">Manage CL Lists</div><div style="font-size:12px;color:#888;">Add/remove Lines, SKUs, Variants</div></div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
             </div>
         </div>
     </div>`;
@@ -3765,6 +3781,10 @@ function openCenterlineAdmin() {
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
+// Static Centerline — opens full admin popup (Add Primary, Add Secondary, Manage CL Lists)
+function openStaticCenterline() {
+    openCenterlineAdmin();
+}
 function openCenterlineForm(type) {
     document.getElementById('clAdminModal').remove();
     const color = type === 'primary' ? '#667eea' : '#764ba2';
@@ -3784,7 +3804,7 @@ function openCenterlineForm(type) {
 
     const modal = document.createElement('div');
     modal.id = 'clFormModal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;padding:15px;box-sizing:border-box;overflow-y:auto;';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:flex-start;z-index:9999;padding:10px;box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch;';
     modal.innerHTML = `
     <div style="background:white;border-radius:12px;max-width:480px;width:100%;margin:auto;overflow:hidden;">
         <div style="background:${color};padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
@@ -4349,11 +4369,35 @@ function openPrivacySettings() {
                 </div>
                 <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
             </div>
-            <div onclick="document.getElementById('privacySettingsModal').remove();openApiSettings();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+            <div onclick="document.getElementById('privacySettingsModal').remove();openApiSettings();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
                 <div style="width:42px;height:42px;background:#f3e5f5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔗</div>
                 <div>
                     <div style="font-weight:700;color:#333;font-size:15px;">API / Bin ID</div>
                     <div style="font-size:12px;color:#888;margin-top:2px;">Server connection settings</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('privacySettingsModal').remove();openLocationSettings();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#e8f5e9;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📍</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">Location Settings</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">Location lock setup</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('privacySettingsModal').remove();toggleDarkMode();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#e3f2fd;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🌙</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">Dark / Light Mode</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">Toggle display mode</div>
+                </div>
+                <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
+            </div>
+            <div onclick="document.getElementById('privacySettingsModal').remove();openThemeSelector();" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
+                <div style="width:42px;height:42px;background:#fce4ec;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎨</div>
+                <div>
+                    <div style="font-weight:700;color:#333;font-size:15px;">Change Theme</div>
+                    <div style="font-size:12px;color:#888;margin-top:2px;">16 themes + custom color</div>
                 </div>
                 <span style="margin-left:auto;color:#ccc;font-size:18px;">›</span>
             </div>
@@ -4820,8 +4864,12 @@ async function syncFromServer() {
         if (rec.centerlineSecondary) {
             localStorage.setItem('centerlineSecondary', JSON.stringify(rec.centerlineSecondary));
         }
+        // CL Lists sync
+        if (rec.cl_lines) localStorage.setItem('cl_lines', JSON.stringify(rec.cl_lines));
+        if (rec.cl_skus) localStorage.setItem('cl_skus', JSON.stringify(rec.cl_skus));
+        if (rec.cl_variants) localStorage.setItem('cl_variants', JSON.stringify(rec.cl_variants));
         const count = Object.keys(serverData).length;
-        showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
+        showSyncToast('✅ Synced', '#4CAF50');
         return serverData;
     } catch (err) {
         showSyncToast('❌ ' + err.message, '#f44336');
@@ -4847,7 +4895,7 @@ async function syncToServer() {
                 'Content-Type': 'application/json',
                 'X-Access-Key': getApiKey()
             },
-            body: JSON.stringify({ records: data, locationSettings, viewPassword, adminPassword: localStorage.getItem('admin_password') || '1234', customFormulas: JSON.parse(localStorage.getItem('customFormulas') || '{}'), highlightNote: JSON.parse(localStorage.getItem('highlightNote') || '{}'), centerlineData: JSON.parse(localStorage.getItem('centerlineData') || '[]'), centerlinePrimary: JSON.parse(localStorage.getItem('centerlinePrimary') || '[]'), centerlineSecondary: JSON.parse(localStorage.getItem('centerlineSecondary') || '[]') })
+            body: JSON.stringify({ records: data, locationSettings, viewPassword, adminPassword: localStorage.getItem('admin_password') || '1234', customFormulas: JSON.parse(localStorage.getItem('customFormulas') || '{}'), highlightNote: JSON.parse(localStorage.getItem('highlightNote') || '{}'), centerlineData: JSON.parse(localStorage.getItem('centerlineData') || '[]'), centerlinePrimary: JSON.parse(localStorage.getItem('centerlinePrimary') || '[]'), centerlineSecondary: JSON.parse(localStorage.getItem('centerlineSecondary') || '[]'), cl_lines: JSON.parse(localStorage.getItem('cl_lines') || '[2,3,4,5]'), cl_skus: JSON.parse(localStorage.getItem('cl_skus') || '[]'), cl_variants: JSON.parse(localStorage.getItem('cl_variants') || '[]') })
         });
         if (!res.ok) {
             if (res.status === 401) throw new Error('401 - API Key wrong!');
@@ -4873,6 +4921,17 @@ function stopAutoSync() {
         _syncPollInterval = null;
     }
 }
+
+// AUTO LOCK — DISABLED
+let _autoLockTimer = null;
+const AUTO_LOCK_MS = 60000;
+function resetAutoLock() {}
+function autoLockApp() {}
+
+// Track user activity — disabled
+// ['touchstart','touchmove','click','keydown','scroll','mousemove'].forEach(evt => {
+//     document.addEventListener(evt, resetAutoLock, { passive: true });
+// });
 
 function unlockApp(role) {
     window._userRole = role || 'admin';
