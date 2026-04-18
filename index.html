@@ -1297,6 +1297,10 @@ body.dark-mode .corner {
         font-size: 22px;
     }
 }
+
+/* Screenshot prevention */
+body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+@media print { body { display: none !important; } }
     </style>
 </head>
 
@@ -2471,7 +2475,8 @@ function checkPassword() {
             setTimeout(() => {
                 if (isJsonBinConfigured()) {
                     syncFromServer().then(merged => {
-                        if (merged) showSyncToast(Object.keys(merged).length + ' records synced', '#667eea');
+                        // Only show record count to admin
+                        if (merged) showSyncToast('✅ Synced', '#667eea');
                     });
                 }
                 unlockApp('admin');
@@ -2699,7 +2704,7 @@ async function useFingerprintAuth(role) {
             // Admin — no location check
             if (isJsonBinConfigured()) {
                 syncFromServer().then(merged => {
-                    if (merged) showSyncToast(Object.keys(merged).length + ' records on server', '#667eea');
+                    if (merged) showSyncToast('✅ Synced', '#667eea');
                 });
             }
             unlockApp('admin');
@@ -3699,18 +3704,6 @@ function openCLListManager() {
             ${buildList('cl_lines', '📍 Lines', getCLLines())}
             ${buildList('cl_skus', '📦 SKUs', getCLSkus())}
             ${buildList('cl_variants', '🏷️ Variants', getCLVariants())}
-            <div style="margin-bottom:14px;">
-                <h4 style="font-size:13px;color:#333;margin-bottom:6px;">📐 Tolerances (±) per field</h4>
-                ${CL_FIELDS.map((f,i) => {
-                    const tol = getCLTolerances();
-                    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-                        <span style="font-size:11px;color:#555;flex:1;">${i+1}. ${f.name}</span>
-                        <input id="tol_${i}" type="number" value="${tol[f.name]||''}" placeholder="±" step="0.1" style="width:60px;padding:5px;border:2px solid #ddd;border-radius:5px;font-size:12px;">
-                        <span style="font-size:11px;color:#999;">${f.unit}</span>
-                    </div>`;
-                }).join('')}
-                <button onclick="saveCLTolerances()" style="width:100%;margin-top:6px;padding:8px;background:#4caf50;color:white;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:700;">💾 Save Tolerances</button>
-            </div>
         </div>
     </div>`;
     document.body.appendChild(modal);
@@ -3785,7 +3778,12 @@ function openCenterlineForm(type) {
     const fieldInputs = CL_FIELDS.map((f, i) =>
         `<div style="margin-bottom:8px;">
             <label style="font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:3px;">${i+1}. ${f.name} <span style="color:#999;">(${f.unit})</span></label>
-            <input id="clf_${i}" type="number" placeholder="0.00" step="0.01" style="width:100%;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+            <div style="display:flex;gap:6px;align-items:center;">
+                <input id="clf_${i}" type="number" placeholder="value" step="0.01" style="flex:1;padding:8px;border:2px solid #ddd;border-radius:6px;font-size:14px;">
+                <span style="color:#555;font-size:13px;font-weight:600;flex-shrink:0;">±</span>
+                <input id="clt_${i}" type="number" placeholder="tol" step="0.1" style="width:70px;padding:8px;border:2px solid #4caf50;border-radius:6px;font-size:13px;color:#2e7d32;" title="Tolerance ±">
+                <span style="color:#999;font-size:11px;flex-shrink:0;">${f.unit}</span>
+            </div>
         </div>`
     ).join('');
 
@@ -3848,15 +3846,18 @@ function saveCenterlineEntry(type) {
     if (!line || !sku) { alert('Line No. and SKU required!'); return; }
 
     const measurements = {};
+    const tolerances = {};
     CL_FIELDS.forEach((f, i) => {
         measurements[f.name] = document.getElementById('clf_' + i).value || '';
+        const t = document.getElementById('clt_' + i).value;
+        if (t) tolerances[f.name] = parseFloat(t);
     });
 
     const key = type === 'primary' ? 'centerlinePrimary' : 'centerlineSecondary';
     const data = JSON.parse(localStorage.getItem(key) || '[]');
     // Update if same line+sku exists, else add
     const idx = data.findIndex(d => d.line == line && d.sku === sku && d.variant === variant);
-    const entry = { line: parseInt(line), sku, variant, measurements, approvedBy, date, type };
+    const entry = { line: parseInt(line), sku, variant, measurements, tolerances, approvedBy, date, type };
     if (idx >= 0) data[idx] = entry; else data.push(entry);
     data.sort((a,b) => a.line - b.line);
     localStorage.setItem(key, JSON.stringify(data));
@@ -3957,7 +3958,7 @@ function runCLSearch(type) {
     const data = JSON.parse(localStorage.getItem(key) || '[]');
     const color = type === 'primary' ? '#667eea' : '#764ba2';
     const title = type === 'primary' ? '🔵 Primary' : '🔴 Secondary';
-    const tol = getCLTolerances();
+    const tol = getCLTolerances(); // fallback global tolerances
 
     let results = data.filter(d =>
         (!line || d.line == line) &&
@@ -3982,7 +3983,10 @@ function runCLSearch(type) {
         const fieldsToShow = CL_FIELDS; // always show all fields
         const mRows = fieldsToShow.map((f, i) => {
             const val = d.measurements[f.name] || '—';
-            const tolVal = tol[f.name];
+            // Use entry-specific tolerance, fallback to global
+            const entryTol = d.tolerances && d.tolerances[f.name];
+            const globalTol = tol[f.name];
+            const tolVal = entryTol !== undefined ? entryTol : globalTol;
             const tolStr = tolVal ? `<span style="color:#4caf50;font-weight:700;"> ±${tolVal}${f.unit}</span>` : '';
             const isHighlighted = (fieldIdx !== '' && parseInt(fieldIdx) === i);
             return `<tr id="clrow_${ri}_${i}" onclick="highlightCLRow('clrow_${ri}_${i}')" style="cursor:pointer;${isHighlighted ? 'background:#e8eaf6;' : ''}">
@@ -3999,8 +4003,25 @@ function runCLSearch(type) {
                 <span>👤 ${d.approvedBy || '—'}</span>
                 <span>📅 ${fmtDate(d.date)}</span>
             </div>
+            ${window._userRole === 'admin' ? `<div style="padding:8px 14px;background:#fff8f8;border-top:1px solid #ffcdd2;">
+                <button onclick="deleteCLEntry('${type}',${ri})" style="width:100%;padding:9px;background:#f44336;color:white;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700;">🗑️ Delete This Entry</button>
+            </div>` : ''}
         </div>`;
     }).join('');
+}
+
+function deleteCLEntry(type, idx) {
+    const pwd = prompt('Enter admin password to delete:');
+    const adminPwd = localStorage.getItem('admin_password') || '1234';
+    if (pwd !== adminPwd) { if (pwd !== null) alert('❌ Wrong password!'); return; }
+    if (!confirm('Delete this centerline entry? This cannot be undone.')) return;
+    const key = type === 'primary' ? 'centerlinePrimary' : 'centerlineSecondary';
+    const data = JSON.parse(localStorage.getItem(key) || '[]');
+    data.splice(idx, 1);
+    localStorage.setItem(key, JSON.stringify(data));
+    syncToServer();
+    showSyncToast('✅ Entry deleted from server', '#f44336');
+    runCLSearch(type);
 }
 
 function highlightCLRow(id) {
@@ -4805,7 +4826,7 @@ async function syncFromServer() {
             localStorage.setItem('centerlineSecondary', JSON.stringify(rec.centerlineSecondary));
         }
         const count = Object.keys(serverData).length;
-        showSyncToast('✅ ' + count + ' records synced', '#4CAF50');
+        showSyncToast('✅ Synced', '#4CAF50');
         return serverData;
     } catch (err) {
         showSyncToast('❌ ' + err.message, '#f44336');
@@ -4858,6 +4879,45 @@ function stopAutoSync() {
     }
 }
 
+// ============================================================
+// AUTO LOCK — 1 minute inactivity
+// ============================================================
+let _autoLockTimer = null;
+const AUTO_LOCK_MS = 60000; // 1 minute
+
+function resetAutoLock() {
+    if (!window._userRole) return; // not logged in
+    clearTimeout(_autoLockTimer);
+    _autoLockTimer = setTimeout(() => {
+        if (window._userRole) {
+            autoLockApp();
+        }
+    }, AUTO_LOCK_MS);
+}
+
+function autoLockApp() {
+    window._userRole = null;
+    clearTimeout(_autoLockTimer);
+    // Show lock screen
+    const ps = document.getElementById('passwordScreen');
+    if (ps) ps.style.display = 'flex';
+    // Clear input
+    const pi = document.getElementById('passwordInput');
+    if (pi) { pi.value = ''; pi.focus(); }
+    const err = document.getElementById('passwordError');
+    if (err) { err.textContent = '🔒 Auto locked due to inactivity'; err.style.color = '#ff9800'; }
+    // Clear results
+    const rc = document.getElementById('resultsContainer');
+    if (rc) rc.innerHTML = '';
+    hideResultCount();
+    stopLocationWatch();
+}
+
+// Track user activity
+['touchstart','touchmove','click','keydown','scroll','mousemove'].forEach(evt => {
+    document.addEventListener(evt, resetAutoLock, { passive: true });
+});
+
 function unlockApp(role) {
     window._userRole = role || 'admin';
     document.getElementById('passwordScreen').style.display = 'none';
@@ -4865,6 +4925,8 @@ function unlockApp(role) {
     const sideMenu = document.getElementById('sideMenu');
     if (sideMenu) sideMenu.classList.remove('active');
     vibrateDevice([100]);
+    // Start auto lock timer
+    resetAutoLock();
     loadDarkMode();
     loadTheme();
     showEmptyState();
