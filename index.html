@@ -4886,7 +4886,7 @@ let _autoLockTimer = null;
 const AUTO_LOCK_MS = 60000; // 1 minute
 
 function resetAutoLock() {
-    if (!window._userRole) return; // not logged in
+    if (!window._userRole) return; // not logged in — don't reset
     clearTimeout(_autoLockTimer);
     _autoLockTimer = setTimeout(() => {
         if (window._userRole) {
@@ -4898,19 +4898,34 @@ function resetAutoLock() {
 function autoLockApp() {
     window._userRole = null;
     clearTimeout(_autoLockTimer);
+    _autoLockTimer = null;
     // Show lock screen
     const ps = document.getElementById('passwordScreen');
-    if (ps) ps.style.display = 'flex';
-    // Clear input
+    if (ps) {
+        ps.style.display = 'flex';
+        ps.style.zIndex = '9999';
+    }
+    // Clear input and focus
     const pi = document.getElementById('passwordInput');
-    if (pi) { pi.value = ''; pi.focus(); }
+    if (pi) {
+        pi.value = '';
+        setTimeout(() => { pi.focus(); }, 300);
+    }
     const err = document.getElementById('passwordError');
-    if (err) { err.textContent = '🔒 Auto locked due to inactivity'; err.style.color = '#ff9800'; }
+    if (err) { err.textContent = '🔒 Auto locked'; err.style.color = '#ff9800'; }
     // Clear results
     const rc = document.getElementById('resultsContainer');
     if (rc) rc.innerHTML = '';
     hideResultCount();
     stopLocationWatch();
+    // Close any open modals
+    ['calcSettingsModal','clSearchFormModal','clSearchModal','clAdminModal','clFormModal','centerlineAdminModal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+    // Close side menu
+    const sm = document.getElementById('sideMenu');
+    if (sm) sm.classList.remove('active');
 }
 
 // Track user activity
