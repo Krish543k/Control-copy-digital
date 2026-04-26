@@ -1339,19 +1339,13 @@ body { -webkit-user-select: none; -moz-user-select: none; user-select: none; }
             <div id="gpsWarning" style="display:none;color:#f44336;font-size:12px;font-weight:600;margin-bottom:8px;text-align:center;"></div>
             <input type="password" id="passwordInput" placeholder="Enter Password" onkeypress="if(event.key==='Enter') checkPassword()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <button onclick="checkPassword()">Unlock</button>
-            <!-- Two fingerprint buttons -->
-            <div style="display:flex;justify-content:center;gap:30px;margin-top:15px;">
+            <!-- Single fingerprint button — auto detects role -->
+            <div style="display:flex;justify-content:center;margin-top:15px;">
                 <div style="text-align:center;">
-                    <div onclick="useFingerprintAuth('admin')" style="width:50px;height:50px;background:#667eea;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 10px rgba(102,126,234,0.4);" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <span style="font-size:24px;">👆</span>
+                    <div onclick="useFingerprintAuth('auto')" style="width:55px;height:55px;background:linear-gradient(135deg,#667eea,#4CAF50);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 15px rgba(102,126,234,0.5);" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <span style="font-size:28px;">👆</span>
                     </div>
-                    <p style="font-size:10px;color:#667eea;margin-top:4px;font-weight:600;">Admin</p>
-                </div>
-                <div style="text-align:center;">
-                    <div onclick="useFingerprintAuth('view')" style="width:50px;height:50px;background:#4CAF50;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 10px rgba(76,175,80,0.4);" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                        <span style="font-size:24px;">👆</span>
-                    </div>
-                    <p style="font-size:10px;color:#4CAF50;margin-top:4px;font-weight:600;">User</p>
+                    <p style="font-size:10px;color:#888;margin-top:5px;font-weight:600;">Fingerprint</p>
                 </div>
             </div>
             <p class="password-error" id="passwordError"></p>
@@ -2647,6 +2641,7 @@ async function _registerFingerprint(role, password) {
             const credId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
             localStorage.setItem('fp_credential_' + role, credId);
             localStorage.setItem('fp_enabled_' + role, 'true');
+            localStorage.setItem('fp_last_role', role); // last registered role save karo
             vibrateDevice([100, 50, 100]);
             showSuccessPopup((role === 'admin' ? 'Admin' : 'User') + ' fingerprint registered!');
             return true;
@@ -2685,10 +2680,33 @@ async function useFingerprintAuth(role) {
         showErrorPopup('Fingerprint not supported!');
         return;
     }
+
+    // Auto mode — detect which role is registered
+    if (role === 'auto') {
+        const adminReg = localStorage.getItem('fp_enabled_admin') === 'true';
+        const viewReg  = localStorage.getItem('fp_enabled_view') === 'true';
+
+        if (!adminReg && !viewReg) {
+            // Koi registered nahi — pehle role choose karo
+            const choice = confirm('Fingerprint Setup\n\nKis ke liye register karna hai?\n\nOK = Admin\nCancel = User');
+            const chosenRole = choice ? 'admin' : 'view';
+            const pwd = prompt('Enter ' + (chosenRole === 'admin' ? 'admin' : 'user') + ' password to register fingerprint:');
+            if (!pwd) return;
+            await _registerFingerprint(chosenRole, pwd);
+            return;
+        } else if (adminReg && viewReg) {
+            // Dono registered — last registered role use karo
+            role = localStorage.getItem('fp_last_role') || 'admin';
+        } else if (adminReg) {
+            role = 'admin';
+        } else {
+            role = 'view';
+        }
+    }
+
     const isRegistered = localStorage.getItem('fp_enabled_' + role) === 'true';
 
     if (!isRegistered) {
-        // First time — register
         const pwd = prompt('Enter ' + (role === 'admin' ? 'admin' : 'user') + ' password to register fingerprint:');
         if (!pwd) return;
         await _registerFingerprint(role, pwd);
